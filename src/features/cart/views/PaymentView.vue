@@ -268,7 +268,7 @@ async function handleBankTransferSubmit(file: File, transferTime: string) {
             <span class="text-[#D96C2C] font-black text-sm">
               ฿ {{ summary.totalAmount.toLocaleString('th-TH') }}
             </span>
-          </div>
+          </div>  
 
           <div class="space-y-2 max-h-36 overflow-y-auto pr-1">
             <div
