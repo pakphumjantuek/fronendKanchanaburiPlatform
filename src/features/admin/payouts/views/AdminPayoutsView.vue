@@ -92,19 +92,44 @@ function formatDate(dateStr?: string) {
   })
 }
 
+const historyLoading = ref(false)
+
 async function loadData() {
+  if (activeTab.value === 'history') {
+    await Promise.all([loadPendingPayouts(), loadPayoutHistory()])
+  } else {
+    await loadPendingPayouts()
+  }
+}
+
+async function loadPendingPayouts() {
   loading.value = true
   try {
-    const [payoutRes, historyRes] = await Promise.all([
-      http.get<AdminMerchantPayoutGroup[]>('/orders/admin/payouts'),
-      http.get<MerchantPayoutRecord[]>('/orders/admin/payouts/history'),
-    ])
-    payouts.value = payoutRes.data
-    history.value = historyRes.data
+    const { data } = await http.get<AdminMerchantPayoutGroup[]>('/orders/admin/payouts')
+    payouts.value = data
   } catch (error) {
     await swal.error('โหลดข้อมูลการโอนเงินไม่สำเร็จ', getApiErrorMessage(error, 'กรุณาลองใหม่อีกครั้ง'))
   } finally {
     loading.value = false
+  }
+}
+
+async function loadPayoutHistory() {
+  historyLoading.value = true
+  try {
+    const { data } = await http.get<MerchantPayoutRecord[]>('/orders/admin/payouts/history')
+    history.value = data
+  } catch (error) {
+    await swal.error('โหลดประวัติการโอนเงินไม่สำเร็จ', getApiErrorMessage(error, 'กรุณาลองใหม่อีกครั้ง'))
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+function selectTab(tab: 'pending' | 'history') {
+  activeTab.value = tab
+  if (tab === 'history' && history.value.length === 0) {
+    loadPayoutHistory()
   }
 }
 
@@ -203,7 +228,7 @@ onMounted(loadData)
             type="button"
             class="px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5"
             :class="activeTab === 'pending' ? 'bg-[#D96C2C] text-white shadow-xs' : 'text-[#786B62] hover:text-[#332820]'"
-            @click="activeTab = 'pending'"
+            @click="selectTab('pending')"
           >
             <i class="mdi mdi-clock-outline"></i> ยอดค้างโอน ({{ payouts.length }})
           </button>
@@ -211,7 +236,7 @@ onMounted(loadData)
             type="button"
             class="px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5"
             :class="activeTab === 'history' ? 'bg-[#332820] text-white shadow-xs' : 'text-[#786B62] hover:text-[#332820]'"
-            @click="activeTab = 'history'"
+            @click="selectTab('history')"
           >
             <i class="mdi mdi-history"></i> ประวัติการโอนแล้ว ({{ history.length }})
           </button>
