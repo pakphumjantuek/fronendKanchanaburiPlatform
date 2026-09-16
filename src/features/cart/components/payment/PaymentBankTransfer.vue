@@ -47,8 +47,10 @@ function handleDrop(event: DragEvent) {
 }
 
 function setFile(file: File) {
-  if (!file.type.startsWith('image/')) {
-    void swal.error('ไฟล์ไม่ถูกต้อง', 'กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .png, .jpeg)')
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  const maxFileSize = 5 * 1024 * 1024
+  if (!allowedTypes.includes(file.type) || file.size > maxFileSize) {
+    void swal.error('ไฟล์ไม่ถูกต้อง', 'รองรับไฟล์ JPG, PNG หรือ WEBP ขนาดไม่เกิน 5 MB')
     return
   }
   selectedFile.value = file
@@ -134,7 +136,7 @@ function onSubmit() {
       >
         <input
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
           @change="handleFileChange"
         />
@@ -143,7 +145,7 @@ function onSubmit() {
             <i class="mdi mdi-cloud-upload-outline"></i>
           </div>
           <p class="text-xs font-black text-[#332820]">คลิก หรือ ลากไฟล์รูปภาพสลิปมาวางที่นี่</p>
-          <p class="text-[10px] text-[#786B62] font-semibold">รองรับไฟล์ภาพ .JPG, .PNG, .JPEG</p>
+          <p class="text-[10px] text-[#786B62] font-semibold">รองรับไฟล์ภาพ .JPG, .PNG, .WEBP ขนาดไม่เกิน 5 MB</p>
         </div>
       </div>
 

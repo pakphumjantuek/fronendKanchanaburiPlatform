@@ -184,32 +184,12 @@ async function handleBankTransferSubmit(file: File, transferTime: string) {
 
   try {
     const ids = queryOrderIds.value
-    // Convert slip file to base64 preview string for storage / backend
-    const reader = new FileReader()
-    const base64Data = await new Promise<string>((resolve) => {
-      reader.onload = () => resolve(reader.result as string)
-      reader.readAsDataURL(file)
-    })
-
-    const formData = new FormData()
-    formData.append('slipFile', file)
-    formData.append('transferTime', transferTime)
 
     for (const orderId of ids) {
-      try {
-        await http.post(`/orders/${orderId}/upload-slip`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
-      } catch {
-        // Fallback update order status and slip data
-        await http.patch(`/orders/${orderId}/status`, {
-          paymentStatus: 'PendingVerification',
-          slipImageUrl: base64Data,
-          slipUploadedAt: transferTime,
-        }).catch(() => {
-          /* ignore fallback silently */
-        })
-      }
+      const formData = new FormData()
+      formData.append('slipFile', file)
+      formData.append('transferTime', transferTime)
+      await http.post(`/orders/${orderId}/upload-slip`, formData)
     }
 
     await swal.success(
