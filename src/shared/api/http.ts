@@ -1,7 +1,7 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { refreshAccessToken } from '@/features/auth/api/authApi'
 
-const http = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api' })
+const http = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'https://coms.kru.ac.th/boatapi/api' })
 let refreshingToken: Promise<string> | null = null
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {

@@ -14,6 +14,12 @@ function logout() {
 
 const navGroups = [
   {
+    title: 'ภาพรวมระบบ',
+    items: [
+      { to: '/admin/dashboard', label: 'แดชบอร์ดภาพรวม (Overview)', icon: 'mdi-view-dashboard-outline' },
+    ],
+  },
+  {
     title: 'การจัดการร้านค้า & คำสั่งซื้อ',
     items: [
       { to: '/admin/shops', label: 'จัดการร้านค้าทั้งหมด', icon: 'mdi-storefront-outline' },

@@ -78,6 +78,7 @@ watch(status, () => {
 })
 onMounted(load)
 </script>
+
 <template>
   <main class="mx-auto w-full max-w-[1600px] px-6 py-10 lg:px-10">
     <RouterLink to="/admin/shops" class="text-sm font-semibold text-indigo-600"
