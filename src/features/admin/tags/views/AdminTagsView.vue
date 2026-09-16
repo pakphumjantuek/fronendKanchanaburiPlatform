@@ -46,7 +46,7 @@ onMounted(load)
 </script>
 
 <template>
-  <main class="mx-auto w-full max-w-[1600px] px-6 py-10 lg:px-10">
+  <main class="mx-auto w-full max-w-[1920px] px-6 py-10 lg:px-10">
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
         <p class="font-semibold text-indigo-600">Content management</p>

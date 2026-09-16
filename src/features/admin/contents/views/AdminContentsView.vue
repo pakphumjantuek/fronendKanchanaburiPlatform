@@ -1,5 +1,5 @@
 <template>
-  <main class="mx-auto w-full max-w-[1600px] px-6 py-10 lg:px-10">
+  <main class="mx-auto w-full max-w-[1920px] px-6 py-10 lg:px-10">
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
         <p class="font-semibold text-indigo-600">Content management</p>
@@ -32,12 +32,7 @@
       @page-change="changePage"
     >
       <template #cell-title="{ item }">
-        <div>
-          <p class="font-semibold text-slate-900">{{ asContent(item).title }}</p>
-          <p class="mt-1 line-clamp-1 text-xs text-slate-500">
-            {{ asContent(item).summary || 'ไม่มีคำอธิบายย่อ' }}
-          </p>
-        </div>
+        <span class="text-sm font-medium text-slate-900">{{ asContent(item).title }}</span>
       </template>
       <template #cell-status="{ item }"
         ><span
@@ -86,9 +81,7 @@ const statusOptions = [
   { value: 'Archived', label: 'เก็บถาวร' },
 ]
 const columns: DataTableColumn[] = [
-  { key: 'title', label: 'คอนเทนต์', class: 'font-semibold text-slate-900' },
-  { key: 'contentCategoryName', label: 'หมวดหมู่', class: 'text-slate-600' },
-  { key: 'districtName', label: 'พื้นที่', class: 'text-slate-600' },
+  { key: 'title', label: 'คอนเทนต์', class: 'text-sm font-medium text-slate-900' },
   { key: 'status', label: 'สถานะ' },
   { key: 'actions', label: 'จัดการ' },
 ]

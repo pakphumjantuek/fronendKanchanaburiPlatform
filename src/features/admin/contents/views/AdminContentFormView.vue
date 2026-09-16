@@ -160,7 +160,7 @@ onMounted(load)
 </script>
 
 <template>
-  <main class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 xl:px-10 xl:py-8">
+  <main class="mx-auto w-full max-w-[1920px] px-4 py-6 sm:px-6 lg:px-8 xl:px-10 xl:py-8">
     <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-6">
       <div>
         <RouterLink to="/admin/contents" class="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700">

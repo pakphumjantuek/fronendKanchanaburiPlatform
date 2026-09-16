@@ -65,7 +65,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-7xl space-y-6 py-4 text-[#332820]">
+  <div class="mx-auto w-full max-w-[1920px] space-y-6 py-4 text-[#332820]">
     <!-- Skeleton Loading -->
     <div v-if="loading" class="space-y-6">
       <div

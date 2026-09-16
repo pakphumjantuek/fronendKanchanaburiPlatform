@@ -362,7 +362,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-4 sm:p-6 lg:p-8 space-y-8 text-[#332820] max-w-7xl mx-auto pb-16">
+  <div class="p-4 sm:p-6 lg:p-8 space-y-8 text-[#332820] max-w-[1920px] mx-auto pb-16">
     
     <!-- 1. HEADER & DATE FILTER CONTROLS -->
     <div class="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[#E8D9C9] pb-6">

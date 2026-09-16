@@ -264,6 +264,28 @@ onMounted(async () => {
             >ประวัติการรับเงินยอดขาย</span
           >
         </RouterLink>
+
+        <!-- Merchant Reports Export -->
+        <RouterLink
+          to="/my-shop/exports"
+          class="group flex items-center gap-4 rounded-2xl px-4 py-3.5 text-sm font-bold transition-all duration-200"
+          :class="
+            active('/my-shop/exports')
+              ? 'bg-[#D96C2C] !text-white font-black shadow-lg shadow-[#D96C2C]/40 ring-1 ring-white/20'
+              : 'text-slate-200 hover:bg-white/10 hover:text-white'
+          "
+          @click="closeMenu"
+        >
+          <i
+            class="mdi mdi-file-download-outline text-2xl transition-transform group-hover:scale-110 shrink-0"
+            :class="active('/my-shop/exports') ? 'text-white' : 'text-[#F2A65A]'"
+          ></i>
+          <span
+            :class="active('/my-shop/exports') ? 'font-black text-white' : 'text-slate-100'"
+            class="text-sm sm:text-base leading-snug"
+            >ส่งออกรายงานร้านค้า</span
+          >
+        </RouterLink>
       </nav>
 
       <!-- Footer / Back Link -->

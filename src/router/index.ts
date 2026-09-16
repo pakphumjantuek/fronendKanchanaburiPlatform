@@ -153,7 +153,8 @@ const router = createRouter({
         {
           path: '',
           name: 'my-shop-dashboard',
-          component: () => import('@/features/shops/merchant/dashboard/views/MerchantDashboardView.vue'),
+          component: () =>
+            import('@/features/shops/merchant/dashboard/views/MerchantDashboardView.vue'),
         },
         {
           path: 'info',
@@ -198,7 +199,14 @@ const router = createRouter({
         {
           path: 'payouts',
           name: 'my-shop-payouts',
-          component: () => import('@/features/shops/merchant/payouts/views/MerchantPayoutsView.vue'),
+          component: () =>
+            import('@/features/shops/merchant/payouts/views/MerchantPayoutsView.vue'),
+        },
+        {
+          path: 'exports',
+          name: 'my-shop-exports',
+          component: () =>
+            import('@/features/shops/merchant/exports/views/MerchantExportsView.vue'),
         },
       ],
     },

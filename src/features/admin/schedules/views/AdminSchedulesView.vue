@@ -36,7 +36,7 @@ onMounted(load)
 </script>
 
 <template>
-  <main class="mx-auto w-full max-w-[1600px] px-6 py-10 lg:px-10">
+  <main class="mx-auto w-full max-w-[1920px] px-6 py-10 lg:px-10">
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div><p class="font-semibold text-indigo-600">Content management</p><h1 class="mt-1 text-3xl font-bold text-slate-900">กำหนดการกิจกรรม</h1><p class="mt-2 text-slate-500">จัดการวันเวลา สถานที่ และรายละเอียดกิจกรรมของคอนเทนต์</p></div>
       <RouterLink to="/admin/schedules/new" class="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700">+ เพิ่มกำหนดการ</RouterLink>

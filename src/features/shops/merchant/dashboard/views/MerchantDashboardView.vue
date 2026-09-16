@@ -294,7 +294,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="space-y-7 text-[#332820] max-w-7xl mx-auto pb-12">
+  <div class="space-y-7 text-[#332820] max-w-[1920px] mx-auto pb-12">
     <!-- Header Banner -->
     <div class="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[#E8D9C9] pb-6">
       <div>
