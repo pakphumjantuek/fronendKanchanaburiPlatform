@@ -180,7 +180,7 @@ async function payWithStripe() {
 
 async function handleBankTransferSubmit(file: File, transferTime: string) {
   paying.value = true
-  errorMessage.value = ''
+  errorMessage.value = ''  
 
   try {
     const ids = queryOrderIds.value
