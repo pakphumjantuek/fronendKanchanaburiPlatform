@@ -122,18 +122,6 @@ function getOrderStatusText(status: string) {
   }
 }
 
-const totalFulfillmentOrders = computed(() => {
-  if (!report.value?.fulfillment) return 0
-  return report.value.fulfillment.deliveryOrdersCount + report.value.fulfillment.pickupOrdersCount
-})
-
-const deliveryPercent = computed(() => {
-  if (totalFulfillmentOrders.value === 0) return 50
-  return Math.round(
-    (report.value!.fulfillment.deliveryOrdersCount / totalFulfillmentOrders.value) * 100,
-  )
-})
-
 function renderChart() {
   if (!canvasRef.value || !report.value?.salesTrend) return
   if (chartInstance) {
@@ -807,16 +795,8 @@ onMounted(load)
               สัดส่วนจัดส่ง & มูลค่าออเดอร์
             </h2>
 
-            <div class="space-y-2">
-              <div class="flex justify-between text-xs font-bold text-[#332820]">
-                <span>🚚 จัดส่งพัสดุ ({{ report.fulfillment.deliveryOrdersCount }})</span>
-                <span>🏪 มารับที่ร้าน ({{ report.fulfillment.pickupOrdersCount }})</span>
-              </div>
-              <!-- Progress Bar -->
-              <div class="h-3 w-full bg-amber-100 rounded-full overflow-hidden flex border border-[#E8D9C9]">
-                <div class="bg-[#D96C2C] transition-all duration-500" :style="{ width: `${deliveryPercent}%` }"></div>
-                <div class="bg-amber-400 flex-1"></div>
-              </div>
+            <div class="rounded-2xl border border-[#E8D9C9] bg-white px-4 py-3 text-xs font-bold text-[#332820]">
+              <span>🚚 ออเดอร์จัดส่งพัสดุ ({{ report.fulfillment.deliveryOrdersCount }})</span>
             </div>
 
             <div class="pt-3 border-t border-[#E8D9C9] flex items-center justify-between text-xs">

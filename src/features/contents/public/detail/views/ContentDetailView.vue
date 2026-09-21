@@ -250,6 +250,7 @@ import {
   getContentReviews,
   getMyContentReview,
   getContentShopProducts,
+  getMyContent,
   getPublicContent,
   getPublicContents,
   recordContentView,
@@ -362,6 +363,7 @@ const reportForm = reactive({ reason: 'ข้อมูลไม่ถูกต�
 
 const loading = ref(true)
 const id = computed(() => (typeof route.params.id === 'string' ? route.params.id : ''))
+const isOwnerPreview = computed(() => route.query.preview === 'mine')
 
 function formatDate(value?: string) {
   if (!value) return '-'
@@ -372,7 +374,9 @@ async function load() {
   if (!id.value) return
   loading.value = true
   try {
-    content.value = await getPublicContent(id.value)
+    content.value = isOwnerPreview.value
+      ? await getMyContent(id.value) as PublicContent
+      : await getPublicContent(id.value)
     const [scheduleItems, productItems, reviews, shops, relatedData] = await Promise.all([
       getContentSchedules(id.value).catch(() => []),
       getContentShopProducts(id.value).catch(() => []),
@@ -394,9 +398,11 @@ async function load() {
     relatedShops.value = 'items' in shops ? shops.items : (shops as Shop[])
     relatedContents.value = (relatedData.items || []).filter((item) => item.contentId !== id.value)
 
-    void recordContentView(id.value)
+    if (!isOwnerPreview.value) {
+      void recordContentView(id.value)
+    }
 
-    if (auth.isLoggedIn) {
+    if (auth.isLoggedIn && !isOwnerPreview.value) {
       void getContentFavoriteStatus(id.value)
         .then((value) => {
           isFavorite.value = value

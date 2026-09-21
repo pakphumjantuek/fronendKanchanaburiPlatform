@@ -227,6 +227,12 @@ const router = createRouter({
           component: () => import('@/features/admin/shops/views/AdminShopListView.vue'),
         },
         {
+          path: 'shops/pending',
+          name: 'admin-pending-shop-applications',
+          component: () =>
+            import('@/features/admin/shops/views/AdminPendingShopApplicationsView.vue'),
+        },
+        {
           path: 'shops/:shopId/products',
           name: 'admin-shop-products',
           component: () => import('@/features/admin/products/views/AdminProductListView.vue'),

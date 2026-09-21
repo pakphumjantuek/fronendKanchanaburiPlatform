@@ -28,9 +28,9 @@ defineProps<Props>()
         class="font-black text-[#D96C2C] uppercase tracking-wider text-xs flex items-center gap-1"
       >
         <i class="mdi mdi-map-marker text-[#D96C2C]"></i>
-        {{ shippingMethod === 'Pickup' ? 'รับสินค้าที่ร้าน' : 'ที่อยู่จัดส่งสินค้า' }}
+        ที่อยู่จัดส่งสินค้า
       </p>
-      <template v-if="shippingMethod !== 'Pickup'">
+      <template>
         <p class="font-black text-sm">
           {{ receiverName }} · {{ receiverPhone }}
         </p>

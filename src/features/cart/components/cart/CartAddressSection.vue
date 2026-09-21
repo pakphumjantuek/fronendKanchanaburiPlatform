@@ -10,7 +10,6 @@ interface Props {
 
 defineProps<Props>()
 
-const shippingMethod = defineModel<'Delivery' | 'Pickup'>('shippingMethod', { default: 'Delivery' })
 const receiverName = defineModel<string>('receiverName', { default: '' })
 const receiverPhone = defineModel<string>('receiverPhone', { default: '' })
 const shippingAddress = defineModel<string>('shippingAddress', { default: '' })
@@ -22,41 +21,8 @@ const emit = defineEmits<{
 
 <template>
   <div class="space-y-3 border-b-2 border-[#E8D9C9] pb-5">
-    <p class="text-sm font-black text-[#332820]">วิธีรับสินค้า</p>
-
-    <!-- Delivery Option -->
-    <label
-      class="flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition"
-      :class="
-        shippingMethod === 'Delivery'
-          ? 'border-[#D96C2C] bg-[#D96C2C]/10 font-black'
-          : 'border-[#E8D9C9] bg-white'
-      "
-    >
-      <input v-model="shippingMethod" value="Delivery" type="radio" class="accent-[#D96C2C]" />
-      <span class="text-sm font-extrabold text-[#332820]">
-        จัดส่งถึงที่อยู่
-        <span class="font-semibold text-[#786B62]">(+50 บาท)</span>
-      </span>
-    </label>
-
-    <!-- Pickup Option -->
-    <label
-      class="flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition"
-      :class="
-        shippingMethod === 'Pickup'
-          ? 'border-[#D96C2C] bg-[#D96C2C]/10 font-black'
-          : 'border-[#E8D9C9] bg-white'
-      "
-    >
-      <input v-model="shippingMethod" value="Pickup" type="radio" class="accent-[#D96C2C]" />
-      <span class="text-sm font-extrabold text-[#332820]">
-        รับสินค้าที่ร้าน <span class="font-semibold text-[#786B62]">(ฟรี)</span>
-      </span>
-    </label>
-
-    <!-- Address Details (Only when Delivery) -->
-    <div v-if="shippingMethod === 'Delivery'" class="space-y-3 pt-1">
+    <p class="text-sm font-black text-[#332820]">ที่อยู่จัดส่งสินค้า</p>
+    <div class="space-y-3 pt-1">
       <!-- Saved Addresses Selector -->
       <div v-if="addresses.length" class="space-y-2">
         <p class="text-sm font-black text-[#332820]">เลือกที่อยู่ที่บันทึกไว้</p>

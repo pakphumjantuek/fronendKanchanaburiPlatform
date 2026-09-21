@@ -37,7 +37,9 @@ const displayProducts = computed(() => {
   >
     <div>
       <!-- Cover Banner Photo Frame -->
-      <div class="relative aspect-16/9 w-full overflow-hidden bg-slate-900 border-b border-[#E8D9C9]">
+      <div
+        class="relative aspect-16/9 w-full overflow-hidden bg-slate-900 border-b border-[#E8D9C9]"
+      >
         <img
           :src="
             imageUrl(shop.backgroundImageUrl || shop.coverImageUrl) ||
@@ -56,7 +58,11 @@ const displayProducts = computed(() => {
           <span
             class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black shadow-xs border border-white/20 text-white"
             :class="
-              index % 3 === 0 ? 'bg-emerald-700' : index % 3 === 1 ? 'bg-amber-600' : 'bg-indigo-600'
+              index % 3 === 0
+                ? 'bg-emerald-700'
+                : index % 3 === 1
+                  ? 'bg-amber-600'
+                  : 'bg-indigo-600'
             "
           >
             {{
@@ -119,15 +125,14 @@ const displayProducts = computed(() => {
             <span class="text-[10px] text-[#786B62] font-semibold">(เรตติ้งดี)</span>
           </span>
           <span class="text-emerald-800 text-xs font-black flex items-center gap-1">
-            <i class="mdi mdi-package-variant text-emerald-700"></i> สินค้า {{ products?.length || 0 }} รายการ
+            <i class="mdi mdi-package-variant text-emerald-700"></i> สินค้า
+            {{ products?.length || 0 }} รายการ
           </span>
         </div>
 
         <!-- Mini Product Thumbnails Strip -->
         <div class="space-y-1.5 pt-0.5">
-          <span class="text-[11px] font-bold text-[#786B62] block">
-            ตัวอย่างสินค้าแนะนำ:
-          </span>
+          <span class="text-[11px] font-bold text-[#786B62] block"> ตัวอย่างสินค้าแนะนำ: </span>
           <div v-if="displayProducts.length" class="grid grid-cols-3 gap-2">
             <RouterLink
               v-for="(prod, pIdx) in displayProducts"

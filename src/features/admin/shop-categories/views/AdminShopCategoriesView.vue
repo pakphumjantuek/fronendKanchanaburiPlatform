@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { categoryImageUrl, deleteCategory, getCategories, type ShopCategory } from '../api/adminShopCategoryApi'
+import {
+  categoryImageUrl,
+  deleteCategory,
+  getCategories,
+  type ShopCategory,
+} from '../api/adminShopCategoryApi'
 import AppDataTable, {
   type DataTableColumn,
   type DataTablePagination,
@@ -10,7 +15,7 @@ const categories = ref<ShopCategory[]>([])
 const loading = ref(true)
 const pagination = ref<DataTablePagination>({ page: 1, pageSize: 10, totalCount: 0, totalPages: 0 })
 const columns: DataTableColumn[] = [
-  { key: 'image', label: 'รูป' },
+  // { key: 'image', label: 'รูป' },
   { key: 'categoryName', label: 'หมวดหมู่', class: 'font-semibold text-slate-900' },
   { key: 'description', label: 'รายละเอียด', class: 'text-slate-600' },
   { key: 'status', label: 'สถานะ' },
@@ -79,7 +84,16 @@ onMounted(load)
       :pagination="pagination"
       empty-message="ยังไม่มีหมวดหมู่ร้าน"
       @page-change="changePage"
-      ><template #cell-image="{ item }"><img v-if="asCategory(item).hasImage" :src="categoryImageUrl(asCategory(item).shopCategoryId)" :alt="asCategory(item).categoryName" class="h-12 w-16 rounded-lg object-cover" /><span v-else class="flex h-12 w-16 items-center justify-center rounded-lg bg-slate-100 text-slate-400"><i class="mdi mdi-image-outline text-xl" /></span></template><template #cell-status="{ item }"
+      ><template #cell-image="{ item }"
+        ><img
+          v-if="asCategory(item).hasImage"
+          :src="categoryImageUrl(asCategory(item).shopCategoryId)"
+          :alt="asCategory(item).categoryName"
+          class="h-12 w-16 rounded-lg object-cover" /><span
+          v-else
+          class="flex h-12 w-16 items-center justify-center rounded-lg bg-slate-100 text-slate-400"
+          ><i class="mdi mdi-image-outline text-xl" /></span></template
+      ><template #cell-status="{ item }"
         ><span
           class="rounded-full px-2.5 py-1 text-xs font-bold"
           :class="

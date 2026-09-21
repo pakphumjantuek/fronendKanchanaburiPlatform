@@ -33,7 +33,6 @@ export async function removeCartItem(id: string) {
 }
 export interface CheckoutData {
   shopId?: string
-  shippingMethod: 'Delivery' | 'Pickup'
   shippingFee: number
   receiverName?: string
   receiverPhone?: string

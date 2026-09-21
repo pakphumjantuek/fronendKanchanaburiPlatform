@@ -16,6 +16,7 @@ function imageUrl(url?: string | null) {
   if (!url) return ''
   return url.startsWith('/') ? `${apiOrigin}${url}` : url
 }
+
 </script>
 
 <template>

@@ -21,7 +21,6 @@ const updating = ref<string | null>(null)
 const swal = useSwal()
 const router = useRouter()
 const checkingOut = ref(false)
-const shippingMethod = ref<'Delivery' | 'Pickup'>('Delivery')
 const receiverName = ref('')
 const receiverPhone = ref('')
 const shippingAddress = ref('')
@@ -49,7 +48,7 @@ const total = computed(() => cartStore.total)
 const itemCount = computed(() => cartStore.itemCount)
 const shopCount = computed(() => groupedItems.value.length)
 const shippingFeePerShop = 50
-const shippingFee = computed(() => (shippingMethod.value === 'Delivery' ? shopCount.value * shippingFeePerShop : 0))
+const shippingFee = computed(() => shopCount.value * shippingFeePerShop)
 const grandTotal = computed(() => total.value + shippingFee.value)
 
 async function load() {
@@ -103,10 +102,7 @@ async function remove(id: string) {
 
 async function placeOrder() {
   if (!cart.value.items.length) return
-  if (
-    shippingMethod.value === 'Delivery' &&
-    (!receiverName.value || !receiverPhone.value || !shippingAddress.value)
-  ) {
+  if (!receiverName.value || !receiverPhone.value || !shippingAddress.value) {
     await swal.warning('กรอกข้อมูลจัดส่งไม่ครบ', 'กรุณาระบุชื่อผู้รับ เบอร์โทร และที่อยู่จัดส่ง')
     return
   }
@@ -114,7 +110,6 @@ async function placeOrder() {
   checkingOut.value = true
   try {
     const res = await checkout({
-      shippingMethod: shippingMethod.value,
       shippingFee: 50,
       receiverName: receiverName.value || undefined,
       receiverPhone: receiverPhone.value || undefined,
@@ -233,7 +228,6 @@ onMounted(load)
 
             <!-- Shipping Address Section -->
             <CartAddressSection
-              v-model:shipping-method="shippingMethod"
               v-model:receiver-name="receiverName"
               v-model:receiver-phone="receiverPhone"
               v-model:shipping-address="shippingAddress"

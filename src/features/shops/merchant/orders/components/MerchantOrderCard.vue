@@ -122,13 +122,8 @@ function formatDate(dateStr: string) {
         <span
           class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-800 border-2 border-sky-200"
         >
-          <i
-            :class="[
-              'mdi',
-              order.shippingMethod === 'Pickup' ? 'mdi-store-check-outline' : 'mdi-truck-outline',
-            ]"
-          ></i>
-          {{ order.shippingMethod === 'Pickup' ? 'รับที่ร้านค้า' : 'จัดส่งสินค้าทางพัสดุ' }}
+          <i class="mdi mdi-truck-outline"></i>
+          จัดส่งสินค้าทางพัสดุ
         </span>
       </div>
 
@@ -154,7 +149,6 @@ function formatDate(dateStr: string) {
     <ShipmentFulfillmentForm
       v-if="
         order.paymentStatus === 'Paid' &&
-        order.shippingMethod !== 'Pickup' &&
         order.orderStatus !== 'Shipped' &&
         order.orderStatus !== 'Completed' &&
         order.orderStatus !== 'Cancelled'

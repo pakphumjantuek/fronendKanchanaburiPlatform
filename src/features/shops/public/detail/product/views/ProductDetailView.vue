@@ -349,7 +349,9 @@ onMounted(async () => {
               </div>
               <div>
                 <h2 class="text-xl font-black text-[#332820]">รีวิวและคะแนนสินค้าจากผู้ซื้อจริง</h2>
-                <p class="text-xs text-[#786B62]">ความคิดเห็นจากลูกค้าที่สั่งซื้อสินค้าและจัดส่งสำเร็จ</p>
+                <p class="text-xs text-[#786B62]">
+                  ความคิดเห็นจากลูกค้าที่สั่งซื้อสินค้าและจัดส่งสำเร็จ
+                </p>
               </div>
             </div>
 
@@ -358,7 +360,9 @@ onMounted(async () => {
               class="grid grid-cols-1 sm:grid-cols-12 gap-6 rounded-2xl bg-[#F7F0E6] p-6 border-2 border-[#E8D9C9] items-center"
             >
               <!-- Left: Big Score -->
-              <div class="sm:col-span-5 flex flex-col items-center justify-center text-center space-y-2 border-b sm:border-b-0 sm:border-r border-[#E8D9C9] pb-4 sm:pb-0 sm:pr-4">
+              <div
+                class="sm:col-span-5 flex flex-col items-center justify-center text-center space-y-2 border-b sm:border-b-0 sm:border-r border-[#E8D9C9] pb-4 sm:pb-0 sm:pr-4"
+              >
                 <span class="text-4xl sm:text-5xl font-black text-[#D96C2C]">
                   {{ reviewData.averageRating > 0 ? reviewData.averageRating : '0.0' }}
                 </span>
@@ -385,7 +389,9 @@ onMounted(async () => {
                   <span class="w-12 flex items-center gap-1 shrink-0 font-black">
                     {{ star }} <i class="mdi mdi-star text-amber-400 text-sm"></i>
                   </span>
-                  <div class="h-2.5 flex-1 rounded-full bg-white border border-[#E8D9C9] overflow-hidden">
+                  <div
+                    class="h-2.5 flex-1 rounded-full bg-white border border-[#E8D9C9] overflow-hidden"
+                  >
                     <div
                       class="h-full rounded-full bg-[#D96C2C] transition-all duration-500"
                       :style="{ width: `${getRatingPercent(star)}%` }"
@@ -430,7 +436,9 @@ onMounted(async () => {
                       :key="star"
                       :class="[
                         'mdi text-sm',
-                        star <= rev.rating ? 'mdi-star text-amber-400' : 'mdi-star-outline text-slate-300',
+                        star <= rev.rating
+                          ? 'mdi-star text-amber-400'
+                          : 'mdi-star-outline text-slate-300',
                       ]"
                     ></i>
                   </div>

@@ -134,6 +134,13 @@ export async function getContentSchedules(contentId: string) {
   return data
 }
 
+export async function getMyContentSchedules(contentId: string) {
+  const { data } = await http.get<ContentSchedule[]>('/schedules/mine', {
+    params: { contentId },
+  })
+  return data
+}
+
 export interface ContentShopProduct {
   productId: string
   shopId: string

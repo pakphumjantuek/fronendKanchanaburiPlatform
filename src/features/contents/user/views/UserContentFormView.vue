@@ -143,7 +143,7 @@ async function load() {
       await loadSubDistricts(form.districtId, true)
 
       // โหลดข้อมูลตารางเวลา/กิจกรรมที่มีอยู่เดิม
-      const existingSchs = await getContentSchedules(contentId.value).catch(() => [])
+      const existingSchs = await getMyContentSchedules(contentId.value).catch(() => [])
       schedulesForm.value = existingSchs.map((s) => ({
         scheduleId: s.scheduleId,
         title: s.title,
@@ -161,8 +161,12 @@ async function load() {
 }
 
 import { getCategoryRule } from '@/features/contents/constants/categoryRules'
-import { getContentSchedules } from '@/features/contents/api'
-import { createSchedule, updateSchedule } from '@/features/admin/schedules/api/adminScheduleApi'
+import { getMyContentSchedules } from '@/features/contents/api'
+import {
+  archiveSchedule,
+  createSchedule,
+  updateSchedule,
+} from '@/features/admin/schedules/api/adminScheduleApi'
 
 const selectedCategoryName = computed(
   () => categories.value.find((c) => c.contentCategoryId === form.contentCategoryId)?.categoryName,
@@ -178,6 +182,7 @@ interface ScheduleItemForm {
 }
 
 const schedulesForm = ref<ScheduleItemForm[]>([])
+const removedScheduleIds = ref<string[]>([])
 
 function addScheduleRow() {
   schedulesForm.value.push({
@@ -189,6 +194,12 @@ function addScheduleRow() {
 }
 
 function removeScheduleRow(index: number) {
+  const schedule = schedulesForm.value[index]
+
+  if (schedule?.scheduleId) {
+    removedScheduleIds.value.push(schedule.scheduleId)
+  }
+
   schedulesForm.value.splice(index, 1)
 }
 
@@ -220,8 +231,13 @@ async function save() {
       targetContentId = res.contentId
     }
 
-    // บันทึกตารางเวลา/กิจกรรม
-    if (targetContentId && selectedCategoryRule.value.hasSchedule !== false && schedulesForm.value.length > 0) {
+    // ลบรายการเดิมที่ผู้ใช้เอาออกจากฟอร์ม
+    for (const scheduleId of removedScheduleIds.value) {
+      await archiveSchedule(scheduleId)
+    }
+
+    // บันทึกตารางเวลา/กิจกรรมที่ยังเหลืออยู่ หรือเพิ่มรายการใหม่
+    if (targetContentId && selectedCategoryRule.value.hasSchedule !== false) {
       for (const item of schedulesForm.value) {
         if (!item.title.trim() || !item.startDateTime) continue
         const schPayload = {
@@ -236,9 +252,9 @@ async function save() {
           status: 'Active' as const,
         }
         if (item.scheduleId) {
-          await updateSchedule(item.scheduleId, schPayload).catch(() => undefined)
+          await updateSchedule(item.scheduleId, schPayload)
         } else {
-          await createSchedule(schPayload).catch(() => undefined)
+          await createSchedule(schPayload)
         }
       }
     }

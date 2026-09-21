@@ -61,7 +61,11 @@
           />
 
           <!-- 2. สมุดที่อยู่จัดส่ง -->
-          <ProfileAddressList v-else-if="currentTab === 'addresses'" :addresses="addresses" />
+          <ProfileAddressList
+            v-else-if="currentTab === 'addresses'"
+            :addresses="addresses"
+            @changed="loadAddresses"
+          />
 
           <!-- 3. กิจกรรมและคอนเทนต์ของคุณ -->
           <ProfileMyContents
@@ -192,6 +196,17 @@ async function load() {
     await swal.error('โหลดข้อมูลไม่สำเร็จ', getApiErrorMessage(error, 'กรุณาลองใหม่อีกครั้ง'))
   } finally {
     loading.value = false
+  }
+}
+
+async function loadAddresses() {
+  try {
+    addresses.value = await getUserAddresses()
+  } catch (error) {
+    await swal.error(
+      'โหลดที่อยู่ไม่สำเร็จ',
+      getApiErrorMessage(error, 'กรุณาลองใหม่อีกครั้ง'),
+    )
   }
 }
 

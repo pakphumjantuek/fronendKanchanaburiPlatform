@@ -147,7 +147,7 @@ function handleSortUpdate(newSort: Array<{ key: string; order: 'asc' | 'desc' }>
 </script>
 
 <template>
-  <div class="vuetify-data-table-wrapper rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all">
+  <div class="vuetify-data-table-wrapper rounded-2xl border-2 border-[#E8D9C9] bg-[#FFF9F2] shadow-sm overflow-hidden transition-all">
     <v-data-table-server
       v-model:sort-by="sortBy"
       theme="light"
@@ -162,7 +162,7 @@ function handleSortUpdate(newSort: Array<{ key: string; order: 'asc' | 'desc' }>
       loading-text="กำลังโหลดข้อมูล..."
       density="comfortable"
       hover
-      class="elevation-0 vuetify-custom-table bg-white text-slate-900"
+      class="elevation-0 vuetify-custom-table bg-[#FFF9F2] text-[#332820]"
       @update:sort-by="handleSortUpdate"
     >
       <!-- Dynamic Cell Slots -->
@@ -172,7 +172,7 @@ function handleSortUpdate(newSort: Array<{ key: string; order: 'asc' | 'desc' }>
         #[`item.${col.key}`]="{ item, value }"
       >
         <slot :name="`cell-${col.key}`" :item="item" :value="value">
-          <span class="text-slate-800 text-sm font-normal">{{ value ?? '-' }}</span>
+          <span class="text-[#332820] text-base font-medium">{{ value ?? '-' }}</span>
         </slot>
       </template>
 
@@ -183,7 +183,7 @@ function handleSortUpdate(newSort: Array<{ key: string; order: 'asc' | 'desc' }>
         #[`header.${col.key}`]="{ column }"
       >
         <slot :name="`header-${col.key}`" :column="column">
-          <span class="font-bold text-slate-700 text-xs sm:text-sm tracking-wide">{{ col.label }}</span>
+          <span class="font-black text-white text-sm sm:text-base tracking-wide">{{ col.label }}</span>
         </slot>
       </template>
 
@@ -191,12 +191,12 @@ function handleSortUpdate(newSort: Array<{ key: string; order: 'asc' | 'desc' }>
       <template #bottom>
         <div
           v-if="totalCount > 0"
-          class="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200/80 px-5 py-3.5 text-xs sm:text-sm text-slate-600 bg-slate-50/70"
+          class="flex flex-wrap items-center justify-between gap-4 border-t-2 border-[#E8D9C9] px-5 py-3.5 text-xs sm:text-sm text-[#786B62] bg-[#F7F0E6]"
         >
           <!-- Left info & page size -->
           <div class="flex items-center gap-4 flex-wrap">
-            <span class="text-slate-600">
-              แสดง <strong class="text-slate-900 font-semibold">{{ startItem }} - {{ endItem }}</strong> จาก <strong class="text-slate-900 font-semibold">{{ totalCount }}</strong> รายการ
+              <span class="text-[#786B62]">
+              แสดง <strong class="text-[#332820] font-black">{{ startItem }} - {{ endItem }}</strong> จาก <strong class="text-[#332820] font-black">{{ totalCount }}</strong> รายการ
             </span>
 
             <div class="flex items-center gap-2 border-l border-slate-300 pl-4">
@@ -297,43 +297,43 @@ function handleSortUpdate(newSort: Array<{ key: string; order: 'asc' | 'desc' }>
 .vuetify-custom-table :deep(tbody),
 .vuetify-custom-table :deep(tr),
 .vuetify-custom-table :deep(td) {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #fff9f2 !important;
+  color: #332820 !important;
 }
 
 .vuetify-custom-table :deep(th) {
   font-weight: 700 !important;
-  color: #334155 !important;
-  background-color: #f8fafc !important;
-  font-size: 0.8125rem !important;
+  color: #ffffff !important;
+  background-color: #332820 !important;
+  font-size: 1rem !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid #e2e8f0 !important;
+  border-bottom: 2px solid #d96c2c !important;
   padding-top: 0.875rem !important;
   padding-bottom: 0.875rem !important;
   white-space: nowrap;
 }
 
 .vuetify-custom-table :deep(th.v-data-table__th--sortable:hover) {
-  background-color: #f1f5f9 !important;
-  color: #4f46e5 !important;
+  background-color: #4a3e35 !important;
+  color: #f2a65a !important;
   cursor: pointer;
 }
 
 .vuetify-custom-table :deep(tr:hover:not(.v-data-table__empty-row) > td) {
-  background-color: #f8fafc !important;
+  background-color: #fbe8d8 !important;
 }
 
 .vuetify-custom-table :deep(td) {
-  font-size: 0.875rem !important;
-  color: #0f172a !important;
+  font-size: 1rem !important;
+  color: #332820 !important;
   padding-top: 0.875rem !important;
   padding-bottom: 0.875rem !important;
-  border-bottom: 1px solid #f1f5f9 !important;
+  border-bottom: 1px solid #f0e3d5 !important;
 }
 
 .vuetify-custom-table :deep(.v-data-table-header__icon) {
-  color: #6366f1 !important;
+  color: #d96c2c !important;
   margin-left: 0.25rem;
 }
 </style>
