@@ -261,6 +261,13 @@ onMounted(load)
 
               <div class="flex items-center gap-2">
                 <RouterLink
+                  :to="`/my-shop/products/${product.productId}/deals`"
+                  class="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 font-black text-rose-700 hover:bg-rose-600 hover:text-white transition shadow-2xs"
+                >
+                  <i class="mdi mdi-lightning-bolt-outline text-xs"></i>
+                  <span>โปรโมชั่น</span>
+                </RouterLink>
+                <RouterLink
                   :to="`/my-shop/products/${product.productId}/edit`"
                   class="inline-flex items-center gap-1 rounded-xl border border-[#D96C2C]/30 bg-[#D96C2C]/10 px-3 py-1.5 font-black text-[#D96C2C] hover:bg-[#D96C2C] hover:text-white transition shadow-2xs"
                 >

@@ -10,6 +10,10 @@ export interface CartItem {
   quantity: number
   availableQuantity: number
   unitPrice: number
+  originalPrice?: number
+  dealType?: string | null
+  dealDiscountValue?: number | null
+  dealEndsAt?: string | null
   subtotal: number
 }
 export interface Cart {

@@ -205,11 +205,12 @@ function clearFilters() {
 
           <!-- Price & Discount -->
           <div class="flex items-baseline gap-2 mt-2">
+            <span v-if="prod.activeDeal" class="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-black text-white">{{ prod.activeDeal.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</span>
             <span class="font-black text-amber-700 text-base sm:text-lg">{{
-              formatPrice(prod.price)
+              formatPrice(prod.activeDeal ? (prod.activeDeal.discountType === 'Percent' ? prod.price * (1 - prod.activeDeal.discountValue / 100) : prod.price - prod.activeDeal.discountValue) : prod.price)
             }}</span>
-            <span class="text-xs text-[#786B62] line-through font-semibold">
-              {{ formatPrice(prod.price * 1.25) }}
+            <span v-if="prod.activeDeal" class="text-xs text-[#786B62] line-through font-semibold">
+              {{ formatPrice(prod.price) }}
             </span>
           </div>
 

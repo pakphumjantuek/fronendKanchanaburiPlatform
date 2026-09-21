@@ -166,6 +166,7 @@ const router = createRouter({
           name: 'my-shop-products',
           component: () => import('@/features/shops/merchant/products/ProductListView.vue'),
         },
+        { path: 'products/:id/deals', name: 'my-shop-product-deals', component: () => import('@/features/shops/merchant/deals/views/MerchantDealsView.vue') },
         {
           path: 'products/new',
           name: 'my-shop-product-new',

@@ -15,7 +15,9 @@ export interface Product {
   imageUrl?: string
   status: string
   detailImages?: string[]
+  activeDeal?: ProductDeal | null
 }
+export interface ProductDeal { productDealId: string; dealType: string; discountType: string; discountValue: number; remainingQuantity: number; endsAt: string }
 
 export interface ProductCategory {
   productCategoryId: string

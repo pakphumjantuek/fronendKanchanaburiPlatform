@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { Product, Shop } from '@/features/shops/api'
 
 const props = defineProps<{
@@ -12,6 +13,21 @@ const props = defineProps<{
 }>()
 
 const quantity = defineModel<number>('quantity', { default: 1 })
+const now = ref(Date.now())
+let dealTimer: ReturnType<typeof setInterval> | undefined
+function toUtcMilliseconds(value: string) {
+  const isoValue = value.replace(' ', 'T')
+  return new Date(/(?:Z|[+-]\d{2}:\d{2})$/i.test(isoValue) ? isoValue : `${isoValue}Z`).getTime()
+}
+const dealRemaining = computed(() => {
+  const end = props.product.activeDeal?.endsAt
+  if (!end) return ''
+  const seconds = Math.max(0, Math.ceil((toUtcMilliseconds(end) - now.value) / 1000))
+  return `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String(Math.floor(seconds % 3600 / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
+})
+const isDealFinished = computed(() => !!props.product.activeDeal?.endsAt && toUtcMilliseconds(props.product.activeDeal.endsAt) <= now.value)
+onMounted(() => { dealTimer = setInterval(() => { now.value = Date.now() }, 1000) })
+onBeforeUnmount(() => { if (dealTimer) clearInterval(dealTimer) })
 
 const emit = defineEmits<{
   (e: 'add-to-cart'): void
@@ -37,17 +53,29 @@ function validateQty() {
     quantity.value = props.maxQuantity
   }
 }
+function dealPrice() {
+  const deal = props.product.activeDeal
+  if (!deal) return props.product.price
+  return deal.discountType === 'Percent' ? props.product.price * (1 - deal.discountValue / 100) : props.product.price - deal.discountValue
+}
 </script>
 
 <template>
   <div class="space-y-5">
     <div class="flex items-center gap-2">
+      <span v-if="product.activeDeal" class="inline-flex items-center gap-1 rounded-full bg-rose-600 px-3 py-1 text-sm font-bold text-white"><i class="mdi mdi-lightning-bolt-outline"></i>{{ product.activeDeal.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</span>
       <span
         class="inline-flex items-center gap-1 px-3.5 py-1 rounded-full text-sm font-semibold bg-[#D96C2C]/10 text-[#D96C2C] border border-[#D96C2C]/20"
       >
         <i class="mdi mdi-tag-outline text-[#D96C2C]"></i>
         {{ shop.categoryName || 'สินค้าชุมชน' }}
       </span>
+    </div>
+
+    <div v-if="product.activeDeal" class="flex flex-wrap items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-800">
+      <span v-if="!isDealFinished"><i class="mdi mdi-clock-outline mr-1"></i>เหลือเวลา {{ dealRemaining }}</span>
+      <span v-else><i class="mdi mdi-clock-remove-outline mr-1"></i>ดีลหมดเวลาแล้ว</span>
+      <span v-if="!isDealFinished" class="rounded-full bg-white px-3 py-1">เหลือ {{ product.activeDeal.remainingQuantity }} สิทธิ์</span>
     </div>
 
     <h1 class="text-3xl sm:text-4xl font-bold text-[#332820] tracking-tight leading-tight">
@@ -94,9 +122,10 @@ function validateQty() {
       class="rounded-2xl bg-[#D96C2C]/10 p-4 sm:p-5 border-2 border-[#D96C2C]/30 flex items-baseline justify-between"
     >
       <div>
-        <span class="text-xs font-semibold text-[#786B62] block uppercase">ราคาขาย</span>
+        <span class="text-xs font-semibold text-[#786B62] block uppercase">{{ product.activeDeal ? 'ราคาดีล' : 'ราคาขาย' }}</span>
+        <span v-if="product.activeDeal" class="mr-2 text-lg text-[#786B62] line-through">{{ formatPrice(product.price) }}</span>
         <span class="text-4xl sm:text-5xl font-bold text-[#D96C2C] tracking-tight">{{
-          formatPrice(product.price)
+          formatPrice(dealPrice())
         }}</span>
       </div>
 

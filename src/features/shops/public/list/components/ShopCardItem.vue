@@ -146,8 +146,10 @@ const displayProducts = computed(() => {
                 :alt="prod.productName"
                 class="w-full aspect-square object-cover rounded-lg group-hover/prod:scale-105 transition"
               />
+              <span v-if="prod.activeDeal" class="block rounded bg-rose-600 px-1 py-0.5 text-[9px] font-black text-white">{{ prod.activeDeal.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</span>
+              <span v-if="prod.activeDeal" class="block text-[10px] text-slate-400 line-through">฿{{ prod.price.toLocaleString() }}</span>
               <span class="block text-xs font-black text-amber-700 truncate">
-                ฿{{ prod.price.toLocaleString() }}
+                ฿{{ prod.activeDeal ? (prod.activeDeal.discountType === 'Percent' ? prod.price * (1 - prod.activeDeal.discountValue / 100) : prod.price - prod.activeDeal.discountValue).toLocaleString() : prod.price.toLocaleString() }}
               </span>
             </RouterLink>
           </div>

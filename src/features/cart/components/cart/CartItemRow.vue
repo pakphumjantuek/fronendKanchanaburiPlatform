@@ -48,6 +48,8 @@ function imageUrl(url?: string) {
         {{ props.item.productName }}
       </h2>
       <div class="flex items-center gap-2 text-sm text-[#786B62]">
+        <span v-if="props.item.dealType" class="rounded-md bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">{{ props.item.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</span>
+        <span v-if="props.item.dealType && props.item.originalPrice" class="text-xs text-[#786B62] line-through">฿ {{ Number(props.item.originalPrice).toLocaleString('th-TH') }}</span>
         <span
           class="font-semibold text-[#D96C2C] bg-[#D96C2C]/10 px-2.5 py-0.5 rounded-md border border-[#D96C2C]/20"
         >
