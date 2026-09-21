@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Public storefront - Orange + Cream Order Detail View
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import http from '@/shared/api/http'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
@@ -22,6 +22,7 @@ interface Order {
   totalAmount: number
   orderStatus: string
   paymentStatus: string
+  paymentExpiresAt?: string | null
   createdAt: string
   items: OrderItem[]
   shippingMethod: string
@@ -36,6 +37,19 @@ const order = ref<Order | null>(null)
 const reviewedProductIds = ref<string[]>([])
 const loading = ref(true)
 const swal = useSwal()
+const now = ref(Date.now())
+let paymentTimer: ReturnType<typeof setInterval> | undefined
+function toUtcMilliseconds(value: string) {
+  const isoValue = value.replace(' ', 'T')
+  const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(isoValue)
+  return new Date(hasTimezone ? isoValue : `${isoValue}Z`).getTime()
+}
+const paymentExpiresAt = computed(() => {
+  if (!order.value) return null
+  return order.value.paymentExpiresAt ?? new Date(toUtcMilliseconds(order.value.createdAt) + 30 * 60 * 1000).toISOString()
+})
+const isAwaitingPayment = computed(() => order.value?.orderStatus === 'Pending' && order.value?.paymentStatus === 'Pending')
+const isExpired = computed(() => order.value?.orderStatus === 'Expired' || order.value?.paymentStatus === 'Expired' || (isAwaitingPayment.value && !!paymentExpiresAt.value && toUtcMilliseconds(paymentExpiresAt.value) <= now.value))
 
 const totalItems = computed(
   () => order.value?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
@@ -44,7 +58,7 @@ const totalItems = computed(
 // Progress Steps calculation for Timeline
 const currentStepIndex = computed(() => {
   if (!order.value) return 1
-  if (order.value.orderStatus === 'Cancelled') return 0
+  if (order.value.orderStatus === 'Cancelled' || isExpired.value) return 0
   if (order.value.orderStatus === 'Completed') return 4
   if (order.value.orderStatus === 'Shipped') return 3
   if (order.value.orderStatus === 'Confirmed' || order.value.paymentStatus === 'Paid') return 2
@@ -52,7 +66,7 @@ const currentStepIndex = computed(() => {
 })
 
 const canPay = computed(
-  () => order.value?.paymentStatus !== 'Paid' && order.value?.orderStatus !== 'Cancelled',
+  () => order.value?.paymentStatus !== 'Paid' && order.value?.orderStatus !== 'Cancelled' && !isExpired.value,
 )
 
 async function fetchMyReviewedProducts() {
@@ -64,6 +78,7 @@ async function fetchMyReviewedProducts() {
 }
 
 onMounted(async () => {
+  paymentTimer = setInterval(() => { now.value = Date.now() }, 1000)
   try {
     const [{ data }] = await Promise.all([
       http.get<Order>(`/orders/${route.params.id}`),
@@ -76,6 +91,7 @@ onMounted(async () => {
     loading.value = false
   }
 })
+onBeforeUnmount(() => { if (paymentTimer) clearInterval(paymentTimer) })
 </script>
 
 <template>
@@ -114,12 +130,15 @@ onMounted(async () => {
 
           <!-- Order Progress Stepper Timeline -->
           <OrderProgressTimeline
-            v-if="order.orderStatus !== 'Cancelled'"
+            v-if="order.orderStatus !== 'Cancelled' && !isExpired"
             :current-step-index="currentStepIndex"
           />
 
           <!-- Order Details Body -->
           <div class="p-6 sm:p-8 space-y-6">
+            <div v-if="isExpired" class="rounded-2xl border border-slate-300 bg-slate-100 p-4 text-sm font-semibold text-slate-700">
+              <i class="mdi mdi-clock-remove-outline mr-1.5 text-lg"></i>คำสั่งซื้อนี้หมดเวลาชำระเงินแล้ว สินค้าถูกคืนเข้าสต็อกเรียบร้อย
+            </div>
             <!-- Items List -->
             <OrderItemsList
               :items="order.items"

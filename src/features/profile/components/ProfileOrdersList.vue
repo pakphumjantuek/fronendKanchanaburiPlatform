@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 export interface OrderItem {
   orderItemId: string
@@ -31,6 +31,7 @@ export interface RichOrder {
   shippingMethod: string
   orderStatus: string
   paymentStatus: string
+  paymentExpiresAt?: string | null
   createdAt: string
   receiverName?: string | null
   receiverPhone?: string | null
@@ -46,9 +47,51 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const selectedTab = ref<'all' | 'to_pay' | 'to_ship' | 'to_receive' | 'completed' | 'cancelled'>('all')
+const selectedTab = ref<'all' | 'to_pay' | 'to_ship' | 'to_receive' | 'completed' | 'cancelled'>(
+  'all',
+)
 const searchQuery = ref('')
 const timePeriod = ref('all')
+const now = ref(Date.now())
+let paymentTimer: ReturnType<typeof setInterval> | undefined
+
+function toUtcMilliseconds(value: string) {
+  const isoValue = value.replace(' ', 'T')
+  return new Date(/(?:Z|[+-]\d{2}:\d{2})$/i.test(isoValue) ? isoValue : `${isoValue}Z`).getTime()
+}
+
+function paymentExpiry(order: RichOrder) {
+  return order.paymentExpiresAt
+    ? toUtcMilliseconds(order.paymentExpiresAt)
+    : toUtcMilliseconds(order.createdAt) + 30 * 60 * 1000
+}
+
+function isAwaitingPayment(order: RichOrder) {
+  return order.orderStatus === 'Pending' && order.paymentStatus === 'Pending'
+}
+
+function isPaymentExpired(order: RichOrder) {
+  return (
+    order.orderStatus === 'Expired' ||
+    order.paymentStatus === 'Expired' ||
+    (isAwaitingPayment(order) && paymentExpiry(order) <= now.value)
+  )
+}
+
+function paymentDeadlineText(order: RichOrder) {
+  if (isPaymentExpired(order)) return 'หมดเวลาชำระเงินแล้ว กรุณาสั่งซื้อสินค้าใหม่อีกครั้ง'
+  const seconds = Math.ceil((paymentExpiry(order) - now.value) / 1000)
+  return `กรุณาชำระภายใน ${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')} นาที`
+}
+
+onMounted(() => {
+  paymentTimer = setInterval(() => {
+    now.value = Date.now()
+  }, 1000)
+})
+onBeforeUnmount(() => {
+  if (paymentTimer) clearInterval(paymentTimer)
+})
 
 const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
   /\/api$/,
@@ -76,8 +119,12 @@ function formatDate(dateStr: string) {
 const counts = computed(() => {
   return {
     all: props.orders.length,
-    to_pay: props.orders.filter((o) => o.paymentStatus !== 'Paid' && o.orderStatus !== 'Cancelled').length,
-    to_ship: props.orders.filter((o) => o.paymentStatus === 'Paid' && (o.orderStatus === 'Confirmed' || o.orderStatus === 'Pending')).length,
+    to_pay: props.orders.filter((o) => isAwaitingPayment(o) && !isPaymentExpired(o)).length,
+    to_ship: props.orders.filter(
+      (o) =>
+        o.paymentStatus === 'Paid' &&
+        (o.orderStatus === 'Confirmed' || o.orderStatus === 'Pending'),
+    ).length,
     to_receive: props.orders.filter((o) => o.orderStatus === 'Shipped').length,
     completed: props.orders.filter((o) => o.orderStatus === 'Completed').length,
     cancelled: props.orders.filter((o) => o.orderStatus === 'Cancelled').length,
@@ -90,9 +137,13 @@ const filteredOrders = computed(() => {
 
   // Status Filter
   if (selectedTab.value === 'to_pay') {
-    list = list.filter((o) => o.paymentStatus !== 'Paid' && o.orderStatus !== 'Cancelled')
+    list = list.filter((o) => isAwaitingPayment(o) && !isPaymentExpired(o))
   } else if (selectedTab.value === 'to_ship') {
-    list = list.filter((o) => o.paymentStatus === 'Paid' && (o.orderStatus === 'Confirmed' || o.orderStatus === 'Pending'))
+    list = list.filter(
+      (o) =>
+        o.paymentStatus === 'Paid' &&
+        (o.orderStatus === 'Confirmed' || o.orderStatus === 'Pending'),
+    )
   } else if (selectedTab.value === 'to_receive') {
     list = list.filter((o) => o.orderStatus === 'Shipped')
   } else if (selectedTab.value === 'completed') {
@@ -120,13 +171,15 @@ const filteredOrders = computed(() => {
   <div class="space-y-6">
     <!-- Top Header Banner of Orders (Matching Reference Image) -->
     <div class="rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-6 shadow-xs">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#E8D9C9] pb-4">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#E8D9C9] pb-4"
+      >
         <div>
           <div class="flex items-center gap-2">
-            <h2 class="text-xl sm:text-2xl font-black text-[#332820]">
-              การซื้อของฉัน
-            </h2>
-            <span class="rounded-full bg-[#D96C2C]/15 px-2.5 py-0.5 text-xs font-black text-[#D96C2C] border border-[#D96C2C]/30">
+            <h2 class="text-xl sm:text-2xl font-black text-[#332820]">การซื้อของฉัน</h2>
+            <span
+              class="rounded-full bg-[#D96C2C]/15 px-2.5 py-0.5 text-xs font-black text-[#D96C2C] border border-[#D96C2C]/30"
+            >
               {{ props.orders.length }} รายการ
             </span>
           </div>
@@ -160,7 +213,9 @@ const filteredOrders = computed(() => {
           <span
             v-if="counts.all > 0"
             class="rounded-full px-1.5 py-0.2 text-[10px]"
-            :class="selectedTab === 'all' ? 'bg-white/30 text-white' : 'bg-[#E8D9C9] text-[#332820]'"
+            :class="
+              selectedTab === 'all' ? 'bg-white/30 text-white' : 'bg-[#E8D9C9] text-[#332820]'
+            "
           >
             {{ counts.all }}
           </span>
@@ -180,7 +235,9 @@ const filteredOrders = computed(() => {
           <span
             v-if="counts.to_pay > 0"
             class="rounded-full px-1.5 py-0.2 text-[10px]"
-            :class="selectedTab === 'to_pay' ? 'bg-white/30 text-white' : 'bg-amber-200 text-amber-900'"
+            :class="
+              selectedTab === 'to_pay' ? 'bg-white/30 text-white' : 'bg-amber-200 text-amber-900'
+            "
           >
             {{ counts.to_pay }}
           </span>
@@ -200,7 +257,9 @@ const filteredOrders = computed(() => {
           <span
             v-if="counts.to_ship > 0"
             class="rounded-full px-1.5 py-0.2 text-[10px]"
-            :class="selectedTab === 'to_ship' ? 'bg-white/30 text-white' : 'bg-[#E8D9C9] text-[#332820]'"
+            :class="
+              selectedTab === 'to_ship' ? 'bg-white/30 text-white' : 'bg-[#E8D9C9] text-[#332820]'
+            "
           >
             {{ counts.to_ship }}
           </span>
@@ -220,7 +279,9 @@ const filteredOrders = computed(() => {
           <span
             v-if="counts.to_receive > 0"
             class="rounded-full px-1.5 py-0.2 text-[10px]"
-            :class="selectedTab === 'to_receive' ? 'bg-white/30 text-white' : 'bg-sky-200 text-sky-900'"
+            :class="
+              selectedTab === 'to_receive' ? 'bg-white/30 text-white' : 'bg-sky-200 text-sky-900'
+            "
           >
             {{ counts.to_receive }}
           </span>
@@ -240,7 +301,11 @@ const filteredOrders = computed(() => {
           <span
             v-if="counts.completed > 0"
             class="rounded-full px-1.5 py-0.2 text-[10px]"
-            :class="selectedTab === 'completed' ? 'bg-white/30 text-white' : 'bg-emerald-200 text-emerald-900'"
+            :class="
+              selectedTab === 'completed'
+                ? 'bg-white/30 text-white'
+                : 'bg-emerald-200 text-emerald-900'
+            "
           >
             {{ counts.completed }}
           </span>
@@ -260,7 +325,9 @@ const filteredOrders = computed(() => {
           <span
             v-if="counts.cancelled > 0"
             class="rounded-full px-1.5 py-0.2 text-[10px]"
-            :class="selectedTab === 'cancelled' ? 'bg-white/30 text-white' : 'bg-rose-200 text-rose-900'"
+            :class="
+              selectedTab === 'cancelled' ? 'bg-white/30 text-white' : 'bg-rose-200 text-rose-900'
+            "
           >
             {{ counts.cancelled }}
           </span>
@@ -270,7 +337,9 @@ const filteredOrders = computed(() => {
       <!-- Search & Filter Bar (Matching Reference Image) -->
       <div class="pt-4 flex flex-col sm:flex-row items-center gap-3">
         <div class="relative w-full flex-1">
-          <i class="mdi mdi-magnify absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <i
+            class="mdi mdi-magnify absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
+          ></i>
           <input
             v-model="searchQuery"
             type="text"
@@ -296,13 +365,13 @@ const filteredOrders = computed(() => {
       v-if="!filteredOrders.length"
       class="rounded-3xl border-2 border-dashed border-[#E8D9C9] bg-[#FFF9F2] p-16 text-center shadow-xs space-y-4"
     >
-      <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#D96C2C]/15 text-[#D96C2C]">
+      <div
+        class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#D96C2C]/15 text-[#D96C2C]"
+      >
         <i class="mdi mdi-receipt-text-remove-outline text-4xl"></i>
       </div>
       <div class="space-y-1">
-        <h3 class="text-base sm:text-lg font-black text-[#332820]">
-          ไม่พบคำสั่งซื้อในสถานะนี้
-        </h3>
+        <h3 class="text-base sm:text-lg font-black text-[#332820]">ไม่พบคำสั่งซื้อในสถานะนี้</h3>
         <p class="text-xs text-[#786B62] font-semibold">
           คุณสามารถเลือกชมสินค้าชุมชนและของฝากจากร้านค้าต่างๆ ในเมืองกาญจน์ได้ตลอดเวลา
         </p>
@@ -326,14 +395,18 @@ const filteredOrders = computed(() => {
         class="overflow-hidden rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] shadow-xs transition hover:shadow-md hover:border-[#D96C2C]"
       >
         <!-- 1. Shop Header Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#E8D9C9] bg-white px-5 py-3.5 sm:px-6">
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#E8D9C9] bg-white px-5 py-3.5 sm:px-6"
+        >
           <div class="flex items-center gap-3">
             <span class="flex items-center gap-1.5 font-black text-sm text-[#332820]">
               <i class="mdi mdi-store text-base text-[#D96C2C]"></i>
               <span>{{ order.shopName || 'ร้านค้าชุมชนกาญจนบุรี' }}</span>
             </span>
 
-            <span class="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-black text-white">
+            <span
+              class="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-black text-white"
+            >
               <i class="mdi mdi-check-decagram text-[11px]"></i>
               ร้านค้าแนะนำ
             </span>
@@ -353,14 +426,23 @@ const filteredOrders = computed(() => {
             <!-- Payment Badge -->
             <span
               v-if="order.paymentStatus !== 'Paid'"
-              class="text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-300"
+              class="px-2.5 py-0.5 rounded-full border"
+              :class="
+                isPaymentExpired(order)
+                  ? 'border-slate-300 bg-slate-100 text-slate-700'
+                  : 'border-amber-300 bg-amber-50 text-amber-700'
+              "
             >
-              รอชำระเงิน
+              {{ isPaymentExpired(order) ? 'หมดเวลาชำระเงินแล้ว' : 'รอชำระเงิน' }}
             </span>
 
             <!-- Status Text on Far Right -->
             <div class="flex items-center gap-1 text-sm font-black">
-              <template v-if="order.orderStatus === 'Shipped'">
+              <template v-if="isPaymentExpired(order)">
+                <i class="mdi mdi-clock-remove-outline text-slate-600 text-base"></i>
+                <span class="text-slate-700">หมดเวลาชำระเงินแล้ว</span>
+              </template>
+              <template v-else-if="order.orderStatus === 'Shipped'">
                 <i class="mdi mdi-truck-fast text-sky-600 text-base"></i>
                 <span class="text-sky-700">พัสดุกำลังอยู่ระหว่างการจัดส่ง</span>
               </template>
@@ -374,7 +456,9 @@ const filteredOrders = computed(() => {
               </template>
               <template v-else>
                 <i class="mdi mdi-clock-outline text-[#D96C2C] text-base"></i>
-                <span class="text-[#D96C2C]">{{ order.paymentStatus === 'Paid' ? 'ร้านกำลังเตรียมสินค้า' : 'รอยืนยันคำสั่งซื้อ' }}</span>
+                <span class="text-[#D96C2C]">{{
+                  order.paymentStatus === 'Paid' ? 'ร้านกำลังเตรียมสินค้า' : 'รอยืนยันคำสั่งซื้อ'
+                }}</span>
               </template>
             </div>
           </div>
@@ -382,38 +466,65 @@ const filteredOrders = computed(() => {
 
         <!-- 2. Shipment Tracking Bar (If Shipped / Has tracking) -->
         <div
+          v-if="isAwaitingPayment(order) || isPaymentExpired(order)"
+          class="border-b border-[#E8D9C9] px-5 py-3 text-sm font-bold sm:px-6"
+          :class="
+            isPaymentExpired(order) ? 'bg-slate-100 text-slate-700' : 'bg-amber-50 text-amber-900'
+          "
+        >
+          <i
+            :class="[
+              'mdi mr-1.5 text-lg',
+              isPaymentExpired(order) ? 'mdi-clock-remove-outline' : 'mdi-clock-outline',
+            ]"
+          ></i
+          >{{ paymentDeadlineText(order) }}
+        </div>
+        <div
           v-if="order.shipment || order.orderStatus === 'Shipped'"
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E8D9C9] bg-sky-50/70 px-5 py-2.5 sm:px-6 text-xs text-sky-950 font-semibold"
         >
           <div class="flex items-center gap-2">
             <i class="mdi mdi-package-variant-closed text-sky-700 text-base"></i>
             <span>
-              <strong>{{ order.shipment?.shippingProvider || 'ขนส่งเอกชน (Flash Express)' }}:</strong>
+              <strong
+                >{{ order.shipment?.shippingProvider || 'ขนส่งเอกชน (Flash Express)' }}:</strong
+              >
               หมายเลขพัสดุ
               <code class="font-mono font-bold text-sky-900 bg-sky-100 px-1.5 py-0.5 rounded">
-                {{ order.shipment?.trackingNumber || `TH${order.orderNumber.replace(/\D/g, '').slice(-10)}` }}
+                {{
+                  order.shipment?.trackingNumber ||
+                  `TH${order.orderNumber.replace(/\D/g, '').slice(-10)}`
+                }}
               </code>
             </span>
           </div>
           <span class="text-[11px] text-sky-800">
-            {{ order.shipment?.shippedAt ? `จัดส่งเมื่อ: ${formatDate(order.shipment.shippedAt)}` : 'พัสดุเตรียมนำส่งให้ลูกค้า' }}
+            {{
+              order.shipment?.shippedAt
+                ? `จัดส่งเมื่อ: ${formatDate(order.shipment.shippedAt)}`
+                : 'พัสดุเตรียมนำส่งให้ลูกค้า'
+            }}
           </span>
         </div>
 
         <!-- 3. Product Items List -->
         <div class="divide-y divide-[#E8D9C9] px-5 sm:px-6">
           <!-- Fallback single row if items list is empty -->
-          <div
-            v-if="!order.items.length"
-            class="flex items-center justify-between py-4"
-          >
+          <div v-if="!order.items.length" class="flex items-center justify-between py-4">
             <div class="flex items-center gap-4">
-              <div class="h-16 w-16 rounded-2xl bg-[#171412] flex items-center justify-center text-slate-400">
+              <div
+                class="h-16 w-16 rounded-2xl bg-[#171412] flex items-center justify-center text-slate-400"
+              >
                 <i class="mdi mdi-package-variant text-2xl text-[#D96C2C]"></i>
               </div>
               <div>
-                <h4 class="font-black text-[#332820] text-sm">คำสั่งซื้อสินค้า #{{ order.orderNumber }}</h4>
-                <p class="text-xs text-[#786B62] font-semibold mt-0.5">สินค้าจากร้านค้าชุมชนเมืองกาญจน์</p>
+                <h4 class="font-black text-[#332820] text-sm">
+                  คำสั่งซื้อสินค้า #{{ order.orderNumber }}
+                </h4>
+                <p class="text-xs text-[#786B62] font-semibold mt-0.5">
+                  สินค้าจากร้านค้าชุมชนเมืองกาญจน์
+                </p>
                 <span class="text-xs text-[#786B62] font-semibold">จำนวน: x1</span>
               </div>
             </div>
@@ -429,7 +540,9 @@ const filteredOrders = computed(() => {
             class="flex items-start sm:items-center justify-between gap-4 py-4"
           >
             <div class="flex items-start sm:items-center gap-4 min-w-0 flex-1">
-              <div class="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-[#171412] overflow-hidden shrink-0 border border-[#E8D9C9]">
+              <div
+                class="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-[#171412] overflow-hidden shrink-0 border border-[#E8D9C9]"
+              >
                 <img
                   v-if="item.imageUrl"
                   :src="imageUrl(item.imageUrl)"
@@ -459,7 +572,10 @@ const filteredOrders = computed(() => {
                 ฿ {{ Number(item.unitPrice).toLocaleString('th-TH') }}
               </span>
               <span v-if="item.quantity > 1" class="text-[11px] text-[#786B62] font-semibold">
-                รวม ฿ {{ Number(item.TotalPrice || item.unitPrice * item.quantity).toLocaleString('th-TH') }}
+                รวม ฿
+                {{
+                  Number(item.TotalPrice || item.unitPrice * item.quantity).toLocaleString('th-TH')
+                }}
               </span>
             </div>
           </div>
@@ -476,7 +592,8 @@ const filteredOrders = computed(() => {
 
             <div class="text-left sm:text-right">
               <span class="text-xs text-[#786B62] font-semibold">
-                ยอดคำสั่งซื้อทั้งหมด ({{ order.items.reduce((s, i) => s + i.quantity, 0) || 1 }} ชิ้น):
+                ยอดคำสั่งซื้อทั้งหมด ({{ order.items.reduce((s, i) => s + i.quantity, 0) || 1 }}
+                ชิ้น):
               </span>
               <span class="text-lg sm:text-xl font-black text-[#D96C2C] ml-1.5">
                 ฿ {{ Number(order.totalAmount).toLocaleString('th-TH') }}
@@ -488,7 +605,10 @@ const filteredOrders = computed(() => {
           </div>
 
           <!-- Buttons Row (Like Reference Image) -->
-          <div class="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-[#E8D9C9]/60">
+          <div
+            v-if="!isPaymentExpired(order)"
+            class="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-[#E8D9C9]/60"
+          >
             <!-- View Order Detail Link -->
             <RouterLink
               :to="`/orders/${order.orderId}`"
@@ -528,6 +648,12 @@ const filteredOrders = computed(() => {
               <span class="!text-white">ซื้ออีกครั้ง</span>
             </RouterLink>
           </div>
+          <p
+            v-else
+            class="border-t border-[#E8D9C9] pt-3 text-right text-sm font-bold text-slate-600"
+          >
+            คำสั่งซื้อนี้หมดเวลาชำระเงินแล้ว กรุณาทำรายการสั่งซื้อใหม่
+          </p>
         </div>
       </article>
     </div>

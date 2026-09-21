@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 export interface OrderSummary {
   orderId: string
   orderNumber: string
   totalAmount: number
   orderStatus: string
   paymentStatus: string
+  paymentExpiresAt?: string | null
   createdAt: string
 }
 
@@ -13,6 +15,23 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const now = ref(Date.now())
+let timer: ReturnType<typeof setInterval> | undefined
+function toUtcMilliseconds(value: string) {
+  const isoValue = value.replace(' ', 'T')
+  const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(isoValue)
+  return new Date(hasTimezone ? isoValue : `${isoValue}Z`).getTime()
+}
+
+const paymentExpiresAt = computed(() => props.order.paymentExpiresAt ?? new Date(toUtcMilliseconds(props.order.createdAt) + 30 * 60 * 1000).toISOString())
+const isExpired = computed(() => props.order.orderStatus === 'Expired' || props.order.paymentStatus === 'Expired' || toUtcMilliseconds(paymentExpiresAt.value) <= now.value)
+const remainingPaymentTime = computed(() => {
+  if (isExpired.value) return ''
+  const seconds = Math.max(0, Math.ceil((toUtcMilliseconds(paymentExpiresAt.value) - now.value) / 1000))
+  return `เหลือเวลา ${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')} นาที`
+})
+onMounted(() => { timer = setInterval(() => { now.value = Date.now() }, 1000) })
+onBeforeUnmount(() => { if (timer) clearInterval(timer) })
 
 function getStatusTitle(status: string) {
   if (status === 'Pending') return 'รอยืนยันคำสั่งซื้อ'
@@ -20,6 +39,7 @@ function getStatusTitle(status: string) {
   if (status === 'Shipped') return 'จัดส่งสินค้าแล้ว'
   if (status === 'Completed') return 'สำเร็จสมบูรณ์'
   if (status === 'Cancelled') return 'ยกเลิกคำสั่งซื้อ'
+  if (status === 'Expired') return 'หมดเวลาชำระเงิน'
   return status
 }
 
@@ -29,6 +49,7 @@ function getStatusBadgeClass(status: string) {
   if (status === 'Shipped') return 'bg-sky-100 text-sky-900 border-sky-300'
   if (status === 'Completed') return 'bg-emerald-100 text-emerald-900 border-emerald-300'
   if (status === 'Cancelled') return 'bg-rose-100 text-rose-900 border-rose-300'
+  if (status === 'Expired') return 'bg-slate-200 text-slate-800 border-slate-300'
   return 'bg-[#F7F0E6] text-[#786B62] border-[#E8D9C9]'
 }
 
@@ -38,6 +59,7 @@ function getStatusIcon(status: string) {
   if (status === 'Shipped') return 'mdi-truck-fast-outline'
   if (status === 'Completed') return 'mdi-check-decagram-outline'
   if (status === 'Cancelled') return 'mdi-close-circle-outline'
+  if (status === 'Expired') return 'mdi-clock-remove-outline'
   return 'mdi-tag-outline'
 }
 
@@ -82,16 +104,18 @@ function formatDate(dateStr: string) {
           :class="
             props.order.paymentStatus === 'Paid'
               ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+              : isExpired
+                ? 'bg-slate-200 text-slate-800 border-slate-300'
               : 'bg-amber-100 text-amber-900 border-amber-300'
           "
         >
           <i
             :class="[
               'mdi',
-              props.order.paymentStatus === 'Paid' ? 'mdi-check-circle' : 'mdi-clock-outline',
+              props.order.paymentStatus === 'Paid' ? 'mdi-check-circle' : isExpired ? 'mdi-clock-remove-outline' : 'mdi-clock-outline',
             ]"
           ></i>
-          <span>{{ props.order.paymentStatus === 'Paid' ? 'ชำระเงินแล้ว' : 'รอชำระเงิน' }}</span>
+          <span>{{ props.order.paymentStatus === 'Paid' ? 'ชำระเงินแล้ว' : isExpired ? 'หมดเวลาชำระเงิน' : 'รอชำระเงิน' }}</span>
         </span>
 
         <!-- Order Fulfillment Status Badge -->
@@ -103,6 +127,7 @@ function formatDate(dateStr: string) {
           <span>{{ getStatusTitle(props.order.orderStatus) }}</span>
         </span>
       </div>
+      <p v-if="remainingPaymentTime" class="-mt-2 text-xs font-bold text-[#BF5720]">{{ remainingPaymentTime }}</p>
     </div>
 
     <!-- Bottom Row: Price & Actions -->
@@ -126,7 +151,7 @@ function formatDate(dateStr: string) {
 
         <!-- Pay CTA Button (if not paid and not cancelled) -->
         <RouterLink
-          v-if="props.order.paymentStatus !== 'Paid' && props.order.orderStatus !== 'Cancelled'"
+          v-if="props.order.paymentStatus !== 'Paid' && props.order.orderStatus !== 'Cancelled' && !isExpired"
           :to="`/orders/${props.order.orderId}/pay`"
           class="inline-flex items-center gap-1.5 rounded-xl bg-[#D96C2C] hover:bg-[#BF5720] px-5 py-2.5 text-xs sm:text-sm font-black text-white shadow-md transition-all border border-[#D96C2C] active:scale-95 cursor-pointer"
         >
