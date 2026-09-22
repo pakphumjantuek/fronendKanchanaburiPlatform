@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   getContentCategories,
@@ -12,7 +12,7 @@ import {
 import { getShops } from '@/features/shops/public/api/shopApi'
 import type { Shop } from '@/features/shops/shared/types/shop'
 import type { Product } from '@/features/shops/shared/types/product'
-import http from '@/shared/api/http'
+import { getActiveDealProducts, getPublicProducts } from '@/features/shops/api/productApi'
 import heroCoverImage from '@/assets/รูปปก.png'
 
 const router = useRouter()
@@ -25,7 +25,17 @@ const communityStories = ref<PublicContent[]>([])
 const districts = ref<District[]>([])
 const shops = ref<Shop[]>([])
 const products = ref<Product[]>([])
+const activeDealProducts = ref<Product[]>([])
 const scrollY = ref(0)
+const currentTime = ref(Date.now())
+let dealCountdownTimer: ReturnType<typeof window.setInterval> | undefined
+
+const visibleDealProducts = computed(() => {
+  return activeDealProducts.value.filter((product) => {
+    const deal = product.activeDeal
+    return !!deal && deal.availableQuantity > 0 && new Date(deal.endsAt).getTime() > currentTime.value
+  })
+})
 
 const quickTags = [
   '🔥 สะพานข้ามแม่น้ำแคว',
@@ -107,6 +117,45 @@ function getProductCover(prod: Product, idx: number) {
   return defaultProductCovers[idx % defaultProductCovers.length]
 }
 
+function dealPrice(product: Product) {
+  const deal = product.activeDeal
+
+  if (!deal) {
+    return product.price
+  }
+
+  if (deal.discountType === 'Percent') {
+    return product.price * (1 - deal.discountValue / 100)
+  }
+
+  return Math.max(0, product.price - deal.discountValue)
+}
+
+function discountLabel(product: Product) {
+  const deal = product.activeDeal
+
+  if (!deal) {
+    return ''
+  }
+
+  return deal.discountType === 'Percent'
+    ? `ลด ${deal.discountValue}%`
+    : `ลด ฿${Number(deal.discountValue).toLocaleString('th-TH')}`
+}
+
+function remainingDealTime(endsAt: string) {
+  const seconds = Math.max(0, Math.floor((new Date(endsAt).getTime() - currentTime.value) / 1000))
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const remainingSeconds = seconds % 60
+  const clock = [hours, minutes, remainingSeconds]
+    .map((value) => String(value).padStart(2, '0'))
+    .join(':')
+
+  return days > 0 ? `${days} วัน ${clock}` : clock
+}
+
 function handleSearch(queryText?: string) {
   const q = queryText ?? searchQuery.value
   if (q && q.trim()) {
@@ -171,12 +220,13 @@ async function loadHomeData() {
       shops.value = (items || []).slice(0, 4)
     }
 
-    try {
-      const { data } = await http.get<Product[]>('/products', { params: { page: 1, pageSize: 4 } })
-      products.value = (data || []).slice(0, 4)
-    } catch {
-      products.value = []
-    }
+    const [productResult, dealProductResult] = await Promise.allSettled([
+      getPublicProducts(),
+      getActiveDealProducts(12),
+    ])
+
+    products.value = productResult.status === 'fulfilled' ? productResult.value.slice(0, 4) : []
+    activeDealProducts.value = dealProductResult.status === 'fulfilled' ? dealProductResult.value : []
   } catch {
     /* ignore */
   }
@@ -185,10 +235,16 @@ async function loadHomeData() {
 
 onMounted(() => {
   void loadHomeData()
+  dealCountdownTimer = window.setInterval(() => {
+    currentTime.value = Date.now()
+  }, 1000)
   window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onUnmounted(() => {
+  if (dealCountdownTimer) {
+    window.clearInterval(dealCountdownTimer)
+  }
   window.removeEventListener('scroll', handleScroll)
 })
 </script>
@@ -421,7 +477,91 @@ onUnmounted(() => {
     </section>
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 space-y-16">
-      <!-- 4. RECOMMENDED STORIES -->
+      <!-- 4. ACTIVE DEALS -->
+      <section v-if="visibleDealProducts.length">
+        <div
+          class="flex flex-col gap-3 border-b-2 border-rose-200 pb-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-md"
+            >
+              <i class="mdi mdi-lightning-bolt text-2xl text-white"></i>
+            </div>
+            <div>
+              <h2 class="font-display text-2xl font-black text-[#332820] sm:text-3xl">
+                โปรโมชันพิเศษ
+              </h2>
+              <p class="mt-0.5 text-xs font-semibold text-[#786B62] sm:text-sm">
+                ราคาพิเศษมีเวลาจำกัด แต่ละสินค้ามีเวลาสิ้นสุดไม่เท่ากัน
+              </p>
+            </div>
+          </div>
+          <RouterLink
+            to="/shops"
+            class="flex shrink-0 items-center gap-1 text-xs font-black text-rose-700 hover:underline sm:text-sm"
+          >
+            <span>ดูสินค้าเพิ่มเติม</span>
+            <i class="mdi mdi-arrow-right text-base"></i>
+          </RouterLink>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <RouterLink
+            v-for="(product, index) in visibleDealProducts"
+            :key="product.productId"
+            :to="`/products/${product.productId}`"
+            class="group flex flex-col overflow-hidden rounded-3xl border-2 border-rose-200 bg-[#FFF9F2] p-3 shadow-md transition duration-300 hover:-translate-y-1 hover:border-rose-500 hover:shadow-xl"
+          >
+            <div class="relative mb-3 aspect-4/3 overflow-hidden rounded-2xl bg-[#171412]">
+              <img
+                :src="getProductCover(product, index)"
+                :alt="product.productName"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
+              <div class="absolute left-2 top-2 flex flex-col gap-1.5">
+                <span class="rounded-full bg-rose-600 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">
+                  <i class="mdi mdi-lightning-bolt-outline mr-0.5"></i>
+                  {{ product.activeDeal?.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}
+                </span>
+                <span class="w-fit rounded-full bg-[#332820]/85 px-2.5 py-1 text-[10px] font-black text-white">
+                  {{ discountLabel(product) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex flex-1 flex-col">
+              <p class="line-clamp-1 text-[11px] font-bold text-[#786B62]">
+                {{ product.shopName || 'ร้านค้าชุมชน' }}
+              </p>
+              <h3 class="mt-1 line-clamp-2 text-sm font-black leading-snug text-[#332820] transition group-hover:text-rose-700 sm:text-base">
+                {{ product.productName }}
+              </h3>
+
+              <div class="mt-2 flex flex-wrap items-baseline gap-x-2">
+                <span class="text-base font-black text-rose-700 sm:text-lg">
+                  ฿{{ Number(dealPrice(product)).toLocaleString('th-TH', { maximumFractionDigits: 2 }) }}
+                </span>
+                <span class="text-xs font-semibold text-[#786B62] line-through">
+                  ฿{{ Number(product.price).toLocaleString('th-TH') }}
+                </span>
+              </div>
+
+              <div class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-rose-800">
+                <div class="flex items-center justify-between gap-2 text-[11px] font-black">
+                  <span class="flex items-center gap-1"><i class="mdi mdi-clock-outline"></i>เหลือเวลา</span>
+                  <span class="tabular-nums">{{ remainingDealTime(product.activeDeal!.endsAt) }}</span>
+                </div>
+                <p class="mt-1 text-[10px] font-bold text-rose-700">
+                  เหลือ {{ product.activeDeal?.availableQuantity }} สิทธิ์
+                </p>
+              </div>
+            </div>
+          </RouterLink>
+        </div>
+      </section>
+
+      <!-- 5. RECOMMENDED STORIES -->
       <section v-if="recommendedContents.length || loading">
         <div
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-[#E8D9C9] pb-4 mb-6"

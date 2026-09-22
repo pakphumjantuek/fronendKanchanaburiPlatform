@@ -17,7 +17,7 @@ export interface Product {
   detailImages?: string[]
   activeDeal?: ProductDeal | null
 }
-export interface ProductDeal { productDealId: string; dealType: string; discountType: string; discountValue: number; remainingQuantity: number; endsAt: string }
+export interface ProductDeal { productDealId: string; dealType: string; discountType: string; discountValue: number; remainingQuantity: number; availableQuantity: number; endsAt: string }
 
 export interface ProductCategory {
   productCategoryId: string
@@ -64,6 +64,13 @@ export interface CreateProductReviewData {
 // ==========================================
 export async function getPublicProducts() {
   const { data } = await http.get<Product[]>('/products')
+  return data
+}
+
+export async function getActiveDealProducts(limit = 12) {
+  const { data } = await http.get<Product[]>('/products/deals/active', {
+    params: { limit },
+  })
   return data
 }
 

@@ -78,7 +78,8 @@ const galleryImages = computed(() => {
 
 const maxQuantity = computed(() => {
   if (!product.value) return 1
-  return Math.max(1, product.value.quantity)
+  const dealQuantity = product.value.activeDeal?.availableQuantity
+  return dealQuantity ?? product.value.quantity
 })
 
 function openMapDirections() {
