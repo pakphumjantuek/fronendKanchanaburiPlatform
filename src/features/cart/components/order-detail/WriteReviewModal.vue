@@ -8,6 +8,7 @@ interface Props {
   isOpen: boolean
   productId: string
   productName: string
+  orderId: string
 }
 
 const props = defineProps<Props>()
@@ -62,6 +63,7 @@ async function handleSubmit() {
   submitting.value = true
   try {
     await createProductReview({
+      orderId: props.orderId,
       productId: props.productId,
       rating: rating.value,
       comment: comment.value.trim(),

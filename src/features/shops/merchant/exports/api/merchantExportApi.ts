@@ -7,8 +7,6 @@ export interface MerchantExportParams {
   from?: string
   to?: string
   orderStatus?: string
-  paymentStatus?: string
-  payoutStatus?: string
   format?: ExportFormat
 }
 

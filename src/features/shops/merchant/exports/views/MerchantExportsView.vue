@@ -22,7 +22,7 @@ const reportOptions: ExportOption[] = [
   {
     value: 'orders',
     title: 'รายงานออเดอร์',
-    description: 'คำสั่งซื้อ สถานะการชำระ และสถานะการรับเงิน',
+    description: 'คำสั่งซื้อ ยอดขาย และสถานะการดำเนินการของออเดอร์',
     icon: 'mdi-receipt-text-outline',
   },
   {
@@ -47,18 +47,6 @@ const orderStatusOptions = [
   { title: 'สำเร็จ', value: 'Completed' },
   { title: 'ยกเลิก', value: 'Cancelled' },
 ]
-const paymentStatusOptions = [
-  { title: 'ทุกสถานะชำระเงิน', value: '' },
-  { title: 'รอชำระเงิน', value: 'Pending' },
-  { title: 'รอตรวจสอบสลิป', value: 'PendingVerification' },
-  { title: 'ชำระแล้ว', value: 'Paid' },
-  { title: 'ชำระเงินไม่สำเร็จ', value: 'Failed' },
-]
-const payoutStatusOptions = [
-  { title: 'ทุกสถานะการรับเงิน', value: '' },
-  { title: 'รอโอนเงิน', value: 'Pending' },
-  { title: 'โอนเงินแล้ว', value: 'Paid' },
-]
 
 const selectedType = ref<MerchantExportType>('orders')
 const format = ref<ExportFormat>('csv')
@@ -66,8 +54,6 @@ const datePreset = ref<DatePreset>('30days')
 const startDate = ref('')
 const endDate = ref('')
 const orderStatus = ref('')
-const paymentStatus = ref('')
-const payoutStatus = ref('')
 const exporting = ref(false)
 const swal = useSwal()
 
@@ -109,8 +95,6 @@ async function downloadReport() {
       from: startDate.value || undefined,
       to: endDate.value || undefined,
       orderStatus: isOrdersReport.value ? orderStatus.value || undefined : undefined,
-      paymentStatus: isOrdersReport.value ? paymentStatus.value || undefined : undefined,
-      payoutStatus: isOrdersReport.value ? payoutStatus.value || undefined : undefined,
       format: format.value,
     })
     await swal.success(
@@ -193,27 +177,11 @@ async function downloadReport() {
         <p class="mb-3 text-xs font-black uppercase tracking-wider text-[#786B62]">
           ตัวกรองออเดอร์เพิ่มเติม
         </p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="max-w-md">
           <AppSelect
             v-model="orderStatus"
             label="สถานะออเดอร์"
             :items="orderStatusOptions"
-            item-title="title"
-            item-value="value"
-            :searchable="false"
-          />
-          <AppSelect
-            v-model="paymentStatus"
-            label="สถานะการชำระเงิน"
-            :items="paymentStatusOptions"
-            item-title="title"
-            item-value="value"
-            :searchable="false"
-          />
-          <AppSelect
-            v-model="payoutStatus"
-            label="สถานะการรับเงิน"
-            :items="payoutStatusOptions"
             item-title="title"
             item-value="value"
             :searchable="false"

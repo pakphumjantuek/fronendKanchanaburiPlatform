@@ -33,7 +33,7 @@
       </AppPageHeader>
 
       <!-- MERCHANT SUMMARY STAT CARDS -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-3 2xl:grid-cols-5">
         <AppStatCard
           title="ออเดอร์ทั้งหมด"
           :value="allOrdersForStats.length"
@@ -44,21 +44,30 @@
         />
 
         <AppStatCard
-          title="ชำระแล้ว (พร้อมจัดส่ง)"
-          :value="totalPaidCount"
+          title="ยืนยันออเดอร์แล้ว"
+          :value="totalConfirmedCount"
           icon="mdi-check-circle-outline"
-          color-scheme="emerald"
-          :active="selectedFilter === 'paid'"
-          @click="selectedFilter = 'paid'"
+          color-scheme="default"
+          :active="selectedFilter === 'Confirmed'"
+          @click="selectedFilter = 'Confirmed'"
         />
 
         <AppStatCard
-          title="รอชำระเงิน"
-          :value="totalPendingCount"
-          icon="mdi-clock-outline"
+          title="รอยืนยันออเดอร์"
+          :value="totalPendingConfirmationCount"
+          icon="mdi-clipboard-text-clock-outline"
           color-scheme="amber"
-          :active="selectedFilter === 'pending_payment'"
-          @click="selectedFilter = 'pending_payment'"
+          :active="selectedFilter === 'Pending'"
+          @click="selectedFilter = 'Pending'"
+        />
+
+        <AppStatCard
+          title="เตรียมจัดส่ง"
+          :value="totalPreparingShipmentCount"
+          icon="mdi-package-variant-closed-check"
+          color-scheme="sky"
+          :active="selectedFilter === 'Processing'"
+          @click="selectedFilter = 'Processing'"
         />
 
         <AppStatCard
@@ -94,28 +103,42 @@
               type="button"
               class="px-4 py-2 rounded-2xl text-xs font-black transition shrink-0 flex items-center gap-1.5 cursor-pointer border-2"
               :class="
-                selectedFilter === 'paid'
-                  ? 'border-emerald-600 bg-emerald-600 text-white shadow-md'
-                  : 'border-[#E8D9C9] bg-white text-[#332820] hover:border-emerald-500'
+                selectedFilter === 'Pending'
+                  ? 'border-amber-500 bg-amber-500 text-white shadow-md'
+                  : 'border-[#E8D9C9] bg-white text-[#332820] hover:border-amber-500'
               "
-              @click="selectedFilter = 'paid'"
+              @click="selectedFilter = 'Pending'"
             >
-              <i class="mdi mdi-check-circle-outline"></i>
-              <span>ชำระเงินแล้ว</span>
+              <i class="mdi mdi-clipboard-text-clock-outline"></i>
+              <span>รอยืนยัน</span>
             </button>
 
             <button
               type="button"
               class="px-4 py-2 rounded-2xl text-xs font-black transition shrink-0 flex items-center gap-1.5 cursor-pointer border-2"
               :class="
-                selectedFilter === 'pending_payment'
-                  ? 'border-amber-500 bg-amber-500 text-white shadow-md'
-                  : 'border-[#E8D9C9] bg-white text-[#332820] hover:border-amber-500'
+                selectedFilter === 'Confirmed'
+                  ? 'border-indigo-600 bg-indigo-600 text-white shadow-md'
+                  : 'border-[#E8D9C9] bg-white text-[#332820] hover:border-indigo-500'
               "
-              @click="selectedFilter = 'pending_payment'"
+              @click="selectedFilter = 'Confirmed'"
             >
-              <i class="mdi mdi-clock-outline"></i>
-              <span>รอชำระเงิน</span>
+              <i class="mdi mdi-check-circle-outline"></i>
+              <span>ยืนยันแล้ว</span>
+            </button>
+
+            <button
+              type="button"
+              class="px-4 py-2 rounded-2xl text-xs font-black transition shrink-0 flex items-center gap-1.5 cursor-pointer border-2"
+              :class="
+                selectedFilter === 'Processing'
+                  ? 'border-sky-600 bg-sky-600 text-white shadow-md'
+                  : 'border-[#E8D9C9] bg-white text-[#332820] hover:border-sky-500'
+              "
+              @click="selectedFilter = 'Processing'"
+            >
+              <i class="mdi mdi-package-variant-closed-check"></i>
+              <span>เตรียมจัดส่ง</span>
             </button>
 
             <button
@@ -210,7 +233,6 @@
           v-for="order in orders"
           :key="order.orderId"
           :order="order"
-          :order-status-options="orderStatusOptions"
           :updating-id="updatingId"
           @update-status="handleUpdateStatus"
           @ship-order="handleShipOrder"
@@ -229,12 +251,6 @@ import AppPageHeader from '@/shared/components/AppPageHeader.vue'
 import AppStatCard from '@/shared/components/AppStatCard.vue'
 import AppDateRangeFilter, { type DatePreset } from '@/shared/components/AppDateRangeFilter.vue'
 import MerchantOrderCard, { type OrderItem } from './components/MerchantOrderCard.vue'
-
-const orderStatusOptions = [
-  { title: 'ยืนยันออเดอร์', value: 'Confirmed' },
-  { title: 'สำเร็จ', value: 'Completed' },
-  { title: 'ยกเลิก', value: 'Cancelled' },
-]
 
 const orders = ref<OrderItem[]>([])
 const allOrdersForStats = ref<OrderItem[]>([])
@@ -302,11 +318,14 @@ watch([selectedFilter, searchNumber, datePreset, startDate, endDate], () => {
   void load(false)
 })
 
-const totalPaidCount = computed(
-  () => allOrdersForStats.value.filter((o) => o.paymentStatus === 'Paid').length,
+const totalPendingConfirmationCount = computed(
+  () => allOrdersForStats.value.filter((o) => o.orderStatus === 'Pending').length,
 )
-const totalPendingCount = computed(
-  () => allOrdersForStats.value.filter((o) => o.paymentStatus !== 'Paid').length,
+const totalConfirmedCount = computed(
+  () => allOrdersForStats.value.filter((o) => o.orderStatus === 'Confirmed').length,
+)
+const totalPreparingShipmentCount = computed(
+  () => allOrdersForStats.value.filter((o) => o.orderStatus === 'Processing').length,
 )
 const totalShippedCount = computed(
   () =>
@@ -322,11 +341,27 @@ function clearDateFilter() {
 }
 
 async function handleUpdateStatus({ order, status }: { order: OrderItem; status: string }) {
+  if (status === 'Cancelled') {
+    const confirmation = await swal.confirm(
+      'ยืนยันการยกเลิกออเดอร์?',
+      'การยกเลิกจะไม่สามารถเปลี่ยนกลับเป็นสถานะเดิมได้',
+    )
+
+    if (!confirmation.isConfirmed) {
+      return
+    }
+  }
+
   updatingId.value = order.orderId
   try {
     await http.patch(`/orders/${order.orderId}/status`, { status })
     order.orderStatus = status
-    const statusTitle = orderStatusOptions.find((opt) => opt.value === status)?.title || status
+    const statusTitle =
+      status === 'Confirmed'
+        ? 'ยืนยันออเดอร์แล้ว'
+        : status === 'Processing'
+          ? 'กำลังเตรียมจัดส่ง'
+          : 'ยกเลิกออเดอร์แล้ว'
     await swal.success('อัปเดตสถานะออเดอร์แล้ว', `เปลี่ยนสถานะเป็น "${statusTitle}" เรียบร้อยแล้ว`)
   } catch (error) {
     await swal.error('อัปเดตไม่สำเร็จ', getApiErrorMessage(error, 'กรุณาลองใหม่อีกครั้ง'))

@@ -33,6 +33,12 @@ Chart.register(
 )
 
 const report = ref<MerchantDashboardReport | null>(null)
+function promotionStatusLabel(status: string) {
+  if (status === 'Active') return 'กำลังใช้งาน'
+  if (status === 'Stopped') return 'หยุดดีลแล้ว'
+  if (status === 'Expired') return 'หมดเวลาแล้ว'
+  return status
+}
 const loading = ref(true)
 const chartDays = ref<7 | 30>(7)
 const chartType = ref<'line' | 'bar'>('line')
@@ -478,9 +484,13 @@ onMounted(load)
 
       <!-- 2. HIGH-END CHARTJS ANALYTICS CANVAS CHART -->
       <section class="rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-6 shadow-xs space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[#E8D9C9] pb-4">
+        <div
+          class="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[#E8D9C9] pb-4"
+        >
           <div class="flex items-center gap-2.5">
-            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#D96C2C] to-[#BF5720] text-white shadow-md">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#D96C2C] to-[#BF5720] text-white shadow-md"
+            >
               <i class="mdi mdi-chart-bell-curve-cumulative text-xl text-white"></i>
             </div>
             <div>
@@ -560,13 +570,17 @@ onMounted(load)
       <!-- 3. Recent Actionable Orders & Quick Actions Section -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <!-- Left: Recent Orders (2 Cols) -->
-        <div class="lg:col-span-2 rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-6 shadow-xs space-y-4">
+        <div
+          class="lg:col-span-2 rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-6 shadow-xs space-y-4"
+        >
           <div class="flex items-center justify-between border-b-2 border-[#E8D9C9] pb-4">
             <div class="flex items-center gap-2">
               <i class="mdi mdi-clock-alert-outline text-[#D96C2C] text-2xl"></i>
               <div>
                 <h2 class="text-lg font-black text-[#332820]">ออเดอร์ล่าสุดที่ต้องดำเนินการ</h2>
-                <p class="text-xs text-[#786B62]">รายการคำสั่งซื้อล่าสุดที่รอตรวจสอบการชำระเงินหรือรอจัดส่ง</p>
+                <p class="text-xs text-[#786B62]">
+                  รายการคำสั่งซื้อล่าสุดที่รอตรวจสอบการชำระเงินหรือรอจัดส่ง
+                </p>
               </div>
             </div>
             <RouterLink
@@ -577,7 +591,10 @@ onMounted(load)
             </RouterLink>
           </div>
 
-          <div v-if="report.recentOrders.length === 0" class="py-10 text-center text-xs text-[#786B62] font-semibold">
+          <div
+            v-if="report.recentOrders.length === 0"
+            class="py-10 text-center text-xs text-[#786B62] font-semibold"
+          >
             ยังไม่มีรายการคำสั่งซื้อเข้ามาในขณะนี้
           </div>
 
@@ -596,12 +613,17 @@ onMounted(load)
                   >
                     {{ getOrderStatusText(order.orderStatus) }}
                   </span>
-                  <span v-if="order.slipImageUrl" class="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <span
+                    v-if="order.slipImageUrl"
+                    class="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300"
+                  >
                     <i class="mdi mdi-file-image-outline"></i> แนบสลิปแล้ว
                   </span>
                 </div>
                 <p class="text-xs text-[#786B62]">
-                  ผู้ซื้อ: <strong class="text-[#332820]">{{ order.receiverName || 'ลูกค้าทั่วไป' }}</strong> | {{ order.itemsCount }} รายการ | {{ formatDate(order.createdAt) }}
+                  ผู้ซื้อ:
+                  <strong class="text-[#332820]">{{ order.receiverName || 'ลูกค้าทั่วไป' }}</strong>
+                  | {{ order.itemsCount }} รายการ | {{ formatDate(order.createdAt) }}
                 </p>
               </div>
 
@@ -624,7 +646,9 @@ onMounted(load)
         <div class="space-y-6">
           <!-- Quick Menu Shortcuts -->
           <div class="rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-5 shadow-xs space-y-3">
-            <h2 class="text-base font-black text-[#332820] flex items-center gap-2 border-b border-[#E8D9C9] pb-3">
+            <h2
+              class="text-base font-black text-[#332820] flex items-center gap-2 border-b border-[#E8D9C9] pb-3"
+            >
               <i class="mdi mdi-lightning-bolt text-[#D96C2C]"></i> เมนูลัดจัดการร้าน
             </h2>
             <div class="grid grid-cols-2 gap-2.5">
@@ -632,28 +656,36 @@ onMounted(load)
                 to="/my-shop/products/new"
                 class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-[#E8D9C9] hover:border-[#D96C2C] hover:bg-[#D96C2C]/5 transition text-center group cursor-pointer"
               >
-                <i class="mdi mdi-plus-box text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"></i>
+                <i
+                  class="mdi mdi-plus-box text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"
+                ></i>
                 <span class="text-xs font-black text-[#332820] mt-1">เพิ่มสินค้า</span>
               </RouterLink>
               <RouterLink
                 to="/my-shop/contents/new"
                 class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-[#E8D9C9] hover:border-[#D96C2C] hover:bg-[#D96C2C]/5 transition text-center group cursor-pointer"
               >
-                <i class="mdi mdi-square-edit-outline text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"></i>
+                <i
+                  class="mdi mdi-square-edit-outline text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"
+                ></i>
                 <span class="text-xs font-black text-[#332820] mt-1">เขียนบทความ</span>
               </RouterLink>
               <RouterLink
                 to="/my-shop/orders"
                 class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-[#E8D9C9] hover:border-[#D96C2C] hover:bg-[#D96C2C]/5 transition text-center group cursor-pointer"
               >
-                <i class="mdi mdi-format-list-checks text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"></i>
+                <i
+                  class="mdi mdi-format-list-checks text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"
+                ></i>
                 <span class="text-xs font-black text-[#332820] mt-1">รายการคำสั่งซื้อ</span>
               </RouterLink>
               <RouterLink
                 to="/my-shop/info"
                 class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-[#E8D9C9] hover:border-[#D96C2C] hover:bg-[#D96C2C]/5 transition text-center group cursor-pointer"
               >
-                <i class="mdi mdi-store-cog-outline text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"></i>
+                <i
+                  class="mdi mdi-store-cog-outline text-2xl text-[#D96C2C] group-hover:scale-110 transition-transform"
+                ></i>
                 <span class="text-xs font-black text-[#332820] mt-1">ตั้งค่าร้านค้า</span>
               </RouterLink>
             </div>
@@ -668,7 +700,10 @@ onMounted(load)
               <span class="text-xs font-bold text-rose-700">≤ 5 ชิ้น</span>
             </div>
 
-            <div v-if="report.lowStockProducts.length === 0" class="py-4 text-center text-xs text-emerald-700 font-bold">
+            <div
+              v-if="report.lowStockProducts.length === 0"
+              class="py-4 text-center text-xs text-emerald-700 font-bold"
+            >
               ✅ สินค้าทุกรายการมีสต็อกพร้อมขาย
             </div>
 
@@ -687,10 +722,14 @@ onMounted(load)
                   />
                   <div class="min-w-0">
                     <p class="text-xs font-black text-[#332820] truncate">{{ prod.productName }}</p>
-                    <p class="text-[11px] font-semibold text-[#786B62]">{{ formatCurrency(prod.price) }}</p>
+                    <p class="text-[11px] font-semibold text-[#786B62]">
+                      {{ formatCurrency(prod.price) }}
+                    </p>
                   </div>
                 </div>
-                <span class="px-2.5 py-1 rounded-xl bg-rose-600 text-white font-black text-xs shrink-0">
+                <span
+                  class="px-2.5 py-1 rounded-xl bg-rose-600 text-white font-black text-xs shrink-0"
+                >
                   เหลือ {{ prod.quantity }}
                 </span>
               </div>
@@ -708,12 +747,18 @@ onMounted(load)
               <i class="mdi mdi-trophy-outline text-xl text-[#D96C2C]"></i>
               สินค้าขายดี 5 อันดับแรก
             </h2>
-            <RouterLink to="/my-shop/products" class="text-xs font-black text-[#D96C2C] hover:underline">
+            <RouterLink
+              to="/my-shop/products"
+              class="text-xs font-black text-[#D96C2C] hover:underline"
+            >
               ทั้งหมด
             </RouterLink>
           </div>
 
-          <div v-if="report.topProducts.length === 0" class="py-8 text-center text-xs text-[#786B62] font-semibold">
+          <div
+            v-if="report.topProducts.length === 0"
+            class="py-8 text-center text-xs text-[#786B62] font-semibold"
+          >
             ยังไม่มีข้อมูลสินค้าขายดีในขณะนี้
           </div>
 
@@ -726,7 +771,15 @@ onMounted(load)
               <div class="flex items-center gap-3 min-w-0">
                 <span
                   class="flex h-7 w-7 items-center justify-center rounded-xl font-black text-xs shrink-0"
-                  :class="index === 0 ? 'bg-amber-400 text-amber-950' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-700 text-white' : 'bg-slate-100 text-slate-700'"
+                  :class="
+                    index === 0
+                      ? 'bg-amber-400 text-amber-950'
+                      : index === 1
+                        ? 'bg-slate-300 text-slate-900'
+                        : index === 2
+                          ? 'bg-amber-700 text-white'
+                          : 'bg-slate-100 text-slate-700'
+                  "
                 >
                   #{{ index + 1 }}
                 </span>
@@ -738,13 +791,19 @@ onMounted(load)
                 />
                 <div class="min-w-0">
                   <p class="text-xs font-black text-[#332820] truncate">{{ prod.productName }}</p>
-                  <p class="text-[11px] font-semibold text-[#786B62]">{{ formatCurrency(prod.price) }}</p>
+                  <p class="text-[11px] font-semibold text-[#786B62]">
+                    {{ formatCurrency(prod.price) }}
+                  </p>
                 </div>
               </div>
 
               <div class="text-right shrink-0">
-                <p class="text-xs font-black text-[#D96C2C]">ขายแล้ว {{ prod.totalUnitsSold }} ชิ้น</p>
-                <p class="text-[11px] font-semibold text-[#786B62]">{{ formatCurrency(prod.totalRevenue) }}</p>
+                <p class="text-xs font-black text-[#D96C2C]">
+                  ขายแล้ว {{ prod.totalUnitsSold }} ชิ้น
+                </p>
+                <p class="text-[11px] font-semibold text-[#786B62]">
+                  {{ formatCurrency(prod.totalRevenue) }}
+                </p>
               </div>
             </div>
           </div>
@@ -757,12 +816,20 @@ onMounted(load)
               <i class="mdi mdi-star text-xl text-amber-500"></i>
               คะแนนและรีวิวล่าสุด
             </h2>
-            <span class="text-xs font-black text-amber-700 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
-              ⭐ {{ report.reviewsSummary.averageRating }} / 5.0 ({{ report.reviewsSummary.totalReviews }} รีวิว)
+            <span
+              class="text-xs font-black text-amber-700 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200"
+            >
+              ⭐ {{ report.reviewsSummary.averageRating }} / 5.0 ({{
+                report.reviewsSummary.totalReviews
+              }}
+              รีวิว)
             </span>
           </div>
 
-          <div v-if="report.reviewsSummary.recentReviews.length === 0" class="py-8 text-center text-xs text-[#786B62] font-semibold">
+          <div
+            v-if="report.reviewsSummary.recentReviews.length === 0"
+            class="py-8 text-center text-xs text-[#786B62] font-semibold"
+          >
             ยังไม่มีรีวิวสำหรับร้านค้าของคุณ
           </div>
 
@@ -778,10 +845,10 @@ onMounted(load)
                   {{ '★'.repeat(rev.rating) }}{{ '☆'.repeat(5 - rev.rating) }}
                 </span>
               </div>
-              <p class="text-xs text-[#786B62] font-medium leading-snug">
-                "{{ rev.comment }}"
+              <p class="text-xs text-[#786B62] font-medium leading-snug">"{{ rev.comment }}"</p>
+              <p class="text-[10px] text-[#786B62]/80 text-right">
+                {{ formatDate(rev.createdAt) }}
               </p>
-              <p class="text-[10px] text-[#786B62]/80 text-right">{{ formatDate(rev.createdAt) }}</p>
             </div>
           </div>
         </div>
@@ -790,25 +857,34 @@ onMounted(load)
         <div class="space-y-6">
           <!-- Fulfillment & AOV Card -->
           <div class="rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-5 shadow-xs space-y-4">
-            <h2 class="text-base font-black text-[#332820] flex items-center gap-2 border-b border-[#E8D9C9] pb-3">
+            <h2
+              class="text-base font-black text-[#332820] flex items-center gap-2 border-b border-[#E8D9C9] pb-3"
+            >
               <i class="mdi mdi-truck-check text-xl text-[#D96C2C]"></i>
               สัดส่วนจัดส่ง & มูลค่าออเดอร์
             </h2>
 
-            <div class="rounded-2xl border border-[#E8D9C9] bg-white px-4 py-3 text-xs font-bold text-[#332820]">
+            <div
+              class="rounded-2xl border border-[#E8D9C9] bg-white px-4 py-3 text-xs font-bold text-[#332820]"
+            >
               <span>🚚 ออเดอร์จัดส่งพัสดุ ({{ report.fulfillment.deliveryOrdersCount }})</span>
             </div>
 
             <div class="pt-3 border-t border-[#E8D9C9] flex items-center justify-between text-xs">
               <span class="text-[#786B62] font-semibold">ยอดขายเฉลี่ยต่อออเดอร์ (AOV):</span>
-              <strong class="font-black text-[#D96C2C] text-sm">{{ formatCurrency(report.fulfillment.averageOrderValue) }}</strong>
+              <strong class="font-black text-[#D96C2C] text-sm">{{
+                formatCurrency(report.fulfillment.averageOrderValue)
+              }}</strong>
             </div>
           </div>
 
           <!-- Merchant Growth Tips Card -->
-          <div class="rounded-3xl border-2 border-amber-200 bg-amber-50/60 p-5 text-xs text-[#332820] space-y-2 font-medium">
+          <div
+            class="rounded-3xl border-2 border-amber-200 bg-amber-50/60 p-5 text-xs text-[#332820] space-y-2 font-medium"
+          >
             <h3 class="font-black text-amber-900 text-sm flex items-center gap-1.5">
-              <i class="mdi mdi-lightbulb-on text-amber-600 text-base"></i> เคล็ดลับเพิ่มยอดขายร้านค้า
+              <i class="mdi mdi-lightbulb-on text-amber-600 text-base"></i>
+              เคล็ดลับเพิ่มยอดขายร้านค้า
             </h3>
             <ul class="space-y-1.5 text-[#786B62] font-semibold pt-1">
               <li>• ลงเรื่องราว/คอนเทนต์วิถีชีวิตร้านค้าเพื่อดึงดูดลูกค้าเข้าร้าน</li>
@@ -816,6 +892,12 @@ onMounted(load)
               <li>• คอยสังเกตสินค้าสต็อกต่ำและเติมสินค้าให้พร้อมขายเสมอ</li>
             </ul>
           </div>
+
+          <section class="lg:col-span-2 rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-5">
+            <h2 class="font-black text-lg"><i class="mdi mdi-chart-bar mr-2 text-[#D96C2C]"></i>วิเคราะห์โปรโมชัน</h2>
+            <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><div class="rounded-xl bg-white p-3">ยอดขายโปร<br><b>{{ formatCurrency(report.promotionAnalytics.promotionRevenue) }}</b></div><div class="rounded-xl bg-white p-3">ส่วนลดรวม<br><b>{{ formatCurrency(report.promotionAnalytics.totalDiscountAmount) }}</b></div><div class="rounded-xl bg-white p-3">สิทธิ์ใช้แล้ว<br><b>{{ report.promotionAnalytics.usedQuantity }}</b></div><div class="rounded-xl bg-white p-3">ดีลกำลังใช้งาน<br><b>{{ report.promotionAnalytics.activeDealsCount }}</b></div></div>
+            <div class="mt-4 overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b"><th class="p-2 text-left">สินค้า</th><th>ประเภท</th><th>สิทธิ์</th><th>ยอดขาย</th><th>ส่วนลด</th><th>สถานะ</th></tr></thead><tbody><tr v-for="deal in report.promotionAnalytics.deals" :key="deal.productDealId" class="border-b"><td class="p-2">{{ deal.productName }}</td><td>{{ deal.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</td><td>{{ deal.usedQuantity }}/{{ deal.totalQuantity }}</td><td>{{ formatCurrency(deal.revenue) }}</td><td>{{ formatCurrency(deal.discountAmount) }}</td><td>{{ promotionStatusLabel(deal.status) }}</td></tr></tbody></table></div>
+          </section>
         </div>
       </div>
     </template>

@@ -232,6 +232,22 @@ export interface MerchantDashboardReport {
       createdAt: string
     }[]
   }
+  promotionAnalytics: {
+    promotionRevenue: number
+    totalDiscountAmount: number
+    usedQuantity: number
+    activeDealsCount: number
+    deals: {
+      productDealId: string
+      productName: string
+      dealType: string
+      usedQuantity: number
+      totalQuantity: number
+      revenue: number
+      discountAmount: number
+      status: string
+    }[]
+  }
 }
 
 export async function getMerchantDashboardReport() {

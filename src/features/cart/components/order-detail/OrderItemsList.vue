@@ -14,6 +14,7 @@ export interface OrderItem {
 interface Props {
   items: OrderItem[]
   totalItems: number
+  orderId: string
   orderStatus?: string
   reviewedProductIds?: string[]
 }
@@ -67,7 +68,7 @@ function handleReviewSuccess() {
 
         <div class="flex items-center justify-between sm:justify-end gap-4">
           <!-- Write Review Button or Reviewed Badge -->
-          <template v-if="orderStatus === 'Completed' || orderStatus === 'Shipped'">
+          <template v-if="orderStatus === 'Completed'">
             <span
               v-if="item.productId && reviewedProductIds.includes(item.productId)"
               class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-100 border border-emerald-300 px-3 py-1.5 text-xs font-black text-emerald-900 shadow-2xs"
@@ -100,6 +101,7 @@ function handleReviewSuccess() {
       :is-open="isModalOpen"
       :product-id="activeReviewItem.productId"
       :product-name="activeReviewItem.productName"
+      :order-id="orderId"
       @close="isModalOpen = false"
       @success="handleReviewSuccess"
     />

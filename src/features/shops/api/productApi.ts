@@ -53,6 +53,7 @@ export interface ProductReviews {
 }
 
 export interface CreateProductReviewData {
+  orderId: string
   productId: string
   rating: number
   comment: string
@@ -92,8 +93,8 @@ export async function createProductReview(reviewData: CreateProductReviewData) {
   return data
 }
 
-export async function getMyReviewedProducts() {
-  const { data } = await http.get<string[]>('/product-reviews/my-reviews')
+export async function getMyReviewedProducts(orderId: string) {
+  const { data } = await http.get<string[]>('/product-reviews/my-reviews', { params: { orderId } })
   return data
 }
 

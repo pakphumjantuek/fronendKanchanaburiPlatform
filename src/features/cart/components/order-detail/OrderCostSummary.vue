@@ -5,7 +5,12 @@ interface Props {
   totalAmount: number
   orderId: string
   canPay: boolean
+  canConfirmReceipt?: boolean
 }
+
+defineEmits<{
+  (event: 'confirm-receipt'): void
+}>()
 
 defineProps<Props>()
 </script>
@@ -44,6 +49,23 @@ defineProps<Props>()
         <i class="mdi mdi-credit-card-outline text-lg text-white"></i>
         <span class="!text-white font-black">ไปที่หน้าชำระเงิน</span>
       </RouterLink>
+    </div>
+
+    <div v-else-if="canConfirmReceipt" class="rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4 sm:flex sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm font-black text-emerald-900">ได้รับสินค้าแล้วหรือไม่?</p>
+        <p class="mt-1 text-xs font-semibold text-emerald-800">
+          ยืนยันเมื่อได้รับสินค้าครบถ้วน เพื่อเปิดสิทธิ์เขียนรีวิวสินค้า
+        </p>
+      </div>
+      <button
+        type="button"
+        class="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-black text-white transition hover:bg-emerald-700 sm:mt-0"
+        @click="$emit('confirm-receipt')"
+      >
+        <i class="mdi mdi-package-check text-base"></i>
+        ยืนยันว่าได้รับสินค้าแล้ว
+      </button>
     </div>
   </div>
 </template>

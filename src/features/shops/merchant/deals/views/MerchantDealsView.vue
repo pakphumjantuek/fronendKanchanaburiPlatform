@@ -82,15 +82,15 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <main class="mx-auto max-w-7xl p-6 lg:p-10">
-    <div class="mb-7 flex items-end justify-between">
+  <main class="mx-auto w-full max-w-[1800px] px-5 py-6 sm:px-8 lg:px-10 lg:py-9 2xl:px-12">
+    <div class="mb-8 flex flex-col gap-4 border-b border-[#E8D9C9] pb-6 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <p class="font-bold text-[#D96C2C]">Promotions</p>
         <h1 class="text-3xl font-black text-[#332820]">จัดการโปรโมชันสินค้า</h1>
         <p class="mt-1 text-[#786B62]">จัดการส่วนลดและช่วงเวลาของสินค้า</p>
       </div>
       <button
-        class="rounded-xl bg-[#D96C2C] px-4 py-2.5 font-bold text-white"
+        class="w-full rounded-xl bg-[#D96C2C] px-5 py-3 font-bold text-white shadow-sm transition hover:bg-[#C95E20] sm:w-auto"
         @click="showForm = !showForm"
       >
         สร้างดีลใหม่
@@ -98,10 +98,10 @@ onMounted(async () => {
     </div>
     <form
       v-if="showForm"
-      class="mb-6 grid gap-3 rounded-2xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-5 md:grid-cols-2"
+      class="mb-8 grid gap-5 rounded-2xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-5 shadow-sm md:grid-cols-2 lg:p-6 2xl:grid-cols-3"
       @submit.prevent="save"
     >
-      <div class="md:col-span-2 rounded-xl border border-[#E8D9C9] bg-[#F7F0E6] px-4 py-3 text-sm font-bold text-[#332820]">
+      <div class="rounded-xl border border-[#E8D9C9] bg-[#F7F0E6] px-4 py-3 text-sm font-bold text-[#332820] md:col-span-2 2xl:col-span-3">
         <i class="mdi mdi-package-variant-closed mr-1.5 text-[#D96C2C]"></i>โปรโมชั่นสำหรับ: {{ productName }}
       </div>
       <label class="space-y-1"
@@ -154,18 +154,23 @@ onMounted(async () => {
           required
           class="w-full rounded-xl border p-3"
       /></label>
-      <button :disabled="saving" class="rounded-xl bg-[#D96C2C] p-3 font-bold text-white">
-        {{ saving ? 'กำลังบันทึก...' : 'บันทึกดีล' }}
-      </button>
+      <div class="flex md:col-span-2 md:justify-end 2xl:col-span-3">
+        <button
+          :disabled="saving"
+          class="w-full rounded-xl bg-[#D96C2C] px-7 py-3 font-bold text-white transition hover:bg-[#C95E20] disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+        >
+          {{ saving ? 'กำลังบันทึก...' : 'บันทึกดีล' }}
+        </button>
+      </div>
     </form>
     <div v-if="loading" class="p-10 text-center">กำลังโหลด...</div>
-    <AppDataTable
-      v-else
-      :columns="columns"
-      :items="deals"
-      row-key="productDealId"
-      empty-message="ยังไม่มีดีล"
-    >
+    <section v-else class="overflow-hidden rounded-2xl border border-[#E8D9C9] bg-white shadow-sm">
+      <AppDataTable
+        :columns="columns"
+        :items="deals"
+        row-key="productDealId"
+        empty-message="ยังไม่มีดีล"
+      >
       <template #cell-dealType="{ item }">{{ label(item as ProductDeal) }}</template
       ><template #cell-discountValue="{ item }">{{
         (item as ProductDeal).discountType === 'Percent'
@@ -188,6 +193,7 @@ onMounted(async () => {
           หยุดดีล
         </button></template
       >
-    </AppDataTable>
+      </AppDataTable>
+    </section>
   </main>
 </template>

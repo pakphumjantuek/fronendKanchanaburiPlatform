@@ -36,6 +36,7 @@ const route = useRoute()
 const order = ref<Order | null>(null)
 const reviewedProductIds = ref<string[]>([])
 const loading = ref(true)
+const confirmingReceipt = ref(false)
 const swal = useSwal()
 const now = ref(Date.now())
 let paymentTimer: ReturnType<typeof setInterval> | undefined
@@ -68,10 +69,43 @@ const currentStepIndex = computed(() => {
 const canPay = computed(
   () => order.value?.paymentStatus !== 'Paid' && order.value?.orderStatus !== 'Cancelled' && !isExpired.value,
 )
+const canConfirmReceipt = computed(
+  () => order.value?.paymentStatus === 'Paid' && order.value?.orderStatus === 'Shipped',
+)
+
+async function confirmReceipt() {
+  if (!order.value) return
+
+  const confirmation = await swal.confirm(
+    'ยืนยันว่าได้รับสินค้าแล้ว?',
+    'หลังยืนยัน คำสั่งซื้อจะสำเร็จสมบูรณ์และคุณสามารถเขียนรีวิวสินค้าได้',
+  )
+
+  if (!confirmation.isConfirmed) return
+
+  confirmingReceipt.value = true
+  try {
+    await http.patch(`/orders/${order.value.orderId}/shipment/status`, {
+      status: 'Completed',
+    })
+    order.value.orderStatus = 'Completed'
+    if (order.value.shipment) {
+      order.value.shipment.shippingStatus = 'Delivered'
+      order.value.shipment.deliveredAt = new Date().toISOString()
+    }
+    await swal.success('ยืนยันรับสินค้าแล้ว', 'คุณสามารถเขียนรีวิวสินค้าที่ซื้อได้แล้ว')
+  } catch (error) {
+    await swal.error('ยืนยันรับสินค้าไม่สำเร็จ', getApiErrorMessage(error, 'กรุณาลองใหม่อีกครั้ง'))
+  } finally {
+    confirmingReceipt.value = false
+  }
+}
 
 async function fetchMyReviewedProducts() {
   try {
-    reviewedProductIds.value = await getMyReviewedProducts()
+    reviewedProductIds.value = order.value
+      ? await getMyReviewedProducts(order.value.orderId)
+      : []
   } catch {
     reviewedProductIds.value = []
   }
@@ -82,9 +116,9 @@ onMounted(async () => {
   try {
     const [{ data }] = await Promise.all([
       http.get<Order>(`/orders/${route.params.id}`),
-      fetchMyReviewedProducts(),
     ])
     order.value = data
+    await fetchMyReviewedProducts()
   } catch (error) {
     await swal.error('ไม่พบออเดอร์', getApiErrorMessage(error, 'คำสั่งซื้อนี้อาจไม่มีอยู่ในระบบ'))
   } finally {
@@ -142,6 +176,7 @@ onBeforeUnmount(() => { if (paymentTimer) clearInterval(paymentTimer) })
             <!-- Items List -->
             <OrderItemsList
               :items="order.items"
+              :order-id="order.orderId"
               :total-items="totalItems"
               :order-status="order.orderStatus"
               :reviewed-product-ids="reviewedProductIds"
@@ -164,6 +199,8 @@ onBeforeUnmount(() => { if (paymentTimer) clearInterval(paymentTimer) })
               :total-amount="order.totalAmount"
               :order-id="order.orderId"
               :can-pay="canPay"
+              :can-confirm-receipt="canConfirmReceipt && !confirmingReceipt"
+              @confirm-receipt="confirmReceipt"
             />
           </div>
         </section>

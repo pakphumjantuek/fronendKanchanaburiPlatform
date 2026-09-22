@@ -94,3 +94,38 @@
 Flutter ต้องใช้ `unitPrice` และ `subtotal` จาก API เป็นยอดแสดงผลเสมอ ห้ามส่งราคาจากแอปไปตัดสินยอดซื้อ
 
 เมื่อ checkout ระบบตรวจเวลา, สถานะ, สิทธิ์คงเหลือ และคำนวณราคาอีกครั้ง จากนั้นเพิ่ม `usedQuantity` ใน transaction เดียวกัน หากสิทธิ์ถูกใช้พร้อมกันจนไม่พอ API จะตอบข้อผิดพลาด ให้โหลดตะกร้าใหม่และแจ้งผู้ใช้
+
+## Dashboard วิเคราะห์โปรโมชัน (Merchant)
+
+`GET /shops/mine/dashboard`
+
+ใช้ Bearer token ของเจ้าของร้าน และคืนฟิลด์ `promotionAnalytics` เพิ่มในรายงาน Dashboard เดิม
+
+```json
+{
+  "promotionAnalytics": {
+    "promotionRevenue": 2400,
+    "totalDiscountAmount": 360,
+    "usedQuantity": 12,
+    "activeDealsCount": 2,
+    "deals": [
+      {
+        "productDealId": "guid",
+        "productName": "สินค้าตัวอย่าง",
+        "dealType": "FlashDeal",
+        "usedQuantity": 8,
+        "totalQuantity": 20,
+        "revenue": 1600,
+        "discountAmount": 240,
+        "status": "Active"
+      }
+    ]
+  }
+}
+```
+
+- `promotionRevenue`: ยอดขายที่เกิดจากรายการสินค้าซึ่งใช้โปรโมชันและชำระเงินแล้ว
+- `totalDiscountAmount`: มูลค่าส่วนลดรวมจากรายการที่ชำระเงินแล้ว
+- `usedQuantity`: จำนวนชิ้นที่ใช้สิทธิ์โปรโมชันแล้ว
+- `activeDealsCount`: จำนวนดีลที่มีสถานะ `Active`
+- `deals`: รายละเอียดแยกตามดีล ใช้ `dealType` เทียบคำแปลในตารางต้นเอกสาร

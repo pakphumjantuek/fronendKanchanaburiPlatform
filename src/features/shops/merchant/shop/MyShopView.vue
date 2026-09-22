@@ -252,7 +252,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-5xl xl:max-w-6xl py-4 space-y-6 text-[#332820]">
+  <div class="mx-auto w-full max-w-[1800px] space-y-7 px-5 py-6 text-[#332820] sm:px-8 lg:px-10 lg:py-9 2xl:px-12">
     <!-- Skeleton Loading -->
     <div v-if="loading" class="space-y-6">
       <div
@@ -266,7 +266,7 @@ onMounted(async () => {
     <template v-else>
       <!-- Page Title & Status Header Card -->
       <div
-        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-6 shadow-xs"
+        class="flex flex-col justify-between gap-5 rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] p-6 shadow-xs sm:flex-row sm:items-center lg:px-8 lg:py-7"
       >
         <div class="flex items-center gap-4">
           <div
@@ -313,7 +313,7 @@ onMounted(async () => {
 
       <!-- Main Form Card -->
       <div class="overflow-hidden rounded-3xl border-2 border-[#E8D9C9] bg-[#FFF9F2] shadow-xs">
-        <form class="space-y-8 p-6 sm:p-8 lg:p-10" @submit.prevent="submit">
+        <form class="space-y-10 p-6 sm:p-8 lg:p-10 2xl:p-12" @submit.prevent="submit">
           <!-- General Info Section -->
           <div class="space-y-6">
             <div class="flex items-center gap-2 border-b-2 border-[#E8D9C9] pb-3">
@@ -321,13 +321,12 @@ onMounted(async () => {
               <h2 class="text-lg font-black text-[#332820]">ข้อมูลทั่วไปของร้านค้า</h2>
             </div>
 
-            <AppTextField
-              v-model="form.shopName"
-              label="ชื่อร้านค้า *"
-              placeholder="ระบุชื่อร้านค้าของคุณ"
-            />
-
-            <div class="max-w-xl">
+            <div class="grid gap-6 md:grid-cols-2 2xl:max-w-5xl">
+              <AppTextField
+                v-model="form.shopName"
+                label="ชื่อร้านค้า *"
+                placeholder="ระบุชื่อร้านค้าของคุณ"
+              />
               <AppSelect
                 v-model="form.shopCategoryId"
                 label="หมวดหมู่ร้านค้า *"
@@ -471,7 +470,7 @@ onMounted(async () => {
               <h2 class="text-lg font-black text-[#332820]">ช่องทางการติดต่อและเวลาเปิดบริการ</h2>
             </div>
 
-            <div class="grid gap-6 sm:grid-cols-2">
+            <div class="grid gap-6 sm:grid-cols-2 2xl:grid-cols-4">
               <AppTextField
                 v-model="form.phone"
                 label="เบอร์โทรศัพท์ติดต่อ"
@@ -483,9 +482,6 @@ onMounted(async () => {
                 type="email"
                 placeholder="shop@example.com"
               />
-            </div>
-
-            <div class="grid gap-6 sm:grid-cols-2">
               <AppTextField v-model="form.openingTime" label="เวลาเปิด" type="time" />
               <AppTextField v-model="form.closingTime" label="เวลาปิด" type="time" />
             </div>
@@ -506,7 +502,7 @@ onMounted(async () => {
               </span>
             </div>
 
-            <div class="grid gap-6 sm:grid-cols-2">
+            <div class="grid gap-6 sm:grid-cols-2 2xl:grid-cols-4">
               <AppTextField
                 v-model="form.bankName"
                 label="ชื่อธนาคาร"
@@ -517,9 +513,6 @@ onMounted(async () => {
                 label="ชื่อบัญชีธนาคาร"
                 placeholder="เช่น นาย สมชาย ใจดี"
               />
-            </div>
-
-            <div class="grid gap-6 sm:grid-cols-2">
               <AppTextField
                 v-model="form.bankAccountNumber"
                 label="เลขที่บัญชีธนาคาร"

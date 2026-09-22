@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import AppSelect from '@/components/common/input/AppSelect.vue'
 import ShipmentFulfillmentForm from './ShipmentFulfillmentForm.vue'
 
 export interface OrderItem {
@@ -12,11 +11,18 @@ export interface OrderItem {
   createdAt: string
   slipImageUrl?: string
   slipUploadedAt?: string
+  items: {
+    orderItemId: string
+    productName: string
+    imageUrl?: string | null
+    quantity: number
+    unitPrice: number
+    totalPrice: number
+  }[]
 }
 
 const props = defineProps<{
   order: OrderItem
-  orderStatusOptions: { title: string; value: string }[]
   updatingId?: string | null
 }>()
 
@@ -26,11 +32,12 @@ const emit = defineEmits<{
 }>()
 
 function getStatusTitle(status: string) {
-  const match = props.orderStatusOptions.find((opt) => opt.value === status)
-  if (match) return match.title
+  if (status === 'Confirmed') return 'ยืนยันออเดอร์แล้ว'
   if (status === 'Pending') return 'รอยืนยัน'
-  if (status === 'Processing') return 'กำลังเตรียมส่ง'
+  if (status === 'Processing') return 'กำลังเตรียมจัดส่ง'
   if (status === 'Shipped') return 'จัดส่งแล้ว'
+  if (status === 'Completed') return 'สำเร็จ'
+  if (status === 'Cancelled') return 'ยกเลิกแล้ว'
   return status
 }
 
@@ -46,6 +53,16 @@ function formatDate(dateStr: string) {
   } catch {
     return dateStr
   }
+}
+
+const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
+  /\/api$/,
+  '',
+)
+
+function imageUrl(url?: string | null) {
+  if (!url) return ''
+  return url.startsWith('/') ? `${apiOrigin}${url}` : url
 }
 </script>
 
@@ -127,31 +144,85 @@ function formatDate(dateStr: string) {
         </span>
       </div>
 
-      <!-- Update Order Status Dropdown -->
-      <div class="flex items-center gap-3">
-        <div class="w-full sm:w-56">
-          <label class="block text-[10px] font-black uppercase tracking-wider text-[#786B62] mb-1">
-            เปลี่ยนสถานะออเดอร์
-          </label>
-          <AppSelect
-            :model-value="order.orderStatus"
-            :items="orderStatusOptions"
-            item-title="title"
-            item-value="value"
-            :disabled="order.paymentStatus !== 'Paid' || updatingId === order.orderId"
-            @update:model-value="emit('update-status', { order, status: String($event) })"
-          />
+      <div
+        v-if="order.orderStatus === 'Pending'"
+        class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
+      >
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-xs font-black text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="updatingId === order.orderId"
+          @click="emit('update-status', { order, status: 'Confirmed' })"
+        >
+          <i class="mdi mdi-check-circle-outline text-base"></i>
+          ยืนยันออเดอร์
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-rose-200 bg-rose-50 px-5 py-2.5 text-xs font-black text-rose-700 transition hover:border-rose-600 hover:bg-rose-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="updatingId === order.orderId"
+          @click="emit('update-status', { order, status: 'Cancelled' })"
+        >
+          <i class="mdi mdi-close-circle-outline text-base"></i>
+          ยกเลิกออเดอร์
+        </button>
+      </div>
+
+      <button
+        v-else-if="order.orderStatus === 'Confirmed'"
+        type="button"
+        class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-600 px-5 py-2.5 text-xs font-black text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        :disabled="updatingId === order.orderId"
+        @click="emit('update-status', { order, status: 'Processing' })"
+      >
+        <i class="mdi mdi-package-variant-closed-check text-base"></i>
+        เตรียมจัดส่ง
+      </button>
+    </div>
+
+    <section class="rounded-2xl border-2 border-[#E8D9C9] bg-white">
+      <div class="flex items-center gap-2 border-b border-[#E8D9C9] px-4 py-3">
+        <i class="mdi mdi-package-variant-closed text-lg text-[#D96C2C]"></i>
+        <h3 class="text-sm font-black text-[#332820]">
+          สินค้าในออเดอร์ ({{ order.items.reduce((total, item) => total + item.quantity, 0) }} ชิ้น)
+        </h3>
+      </div>
+
+      <div class="divide-y divide-[#E8D9C9]">
+        <div
+          v-for="item in order.items"
+          :key="item.orderItemId"
+          class="flex items-center justify-between gap-4 px-4 py-3"
+        >
+          <div class="flex min-w-0 items-center gap-3">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#E8D9C9] bg-[#F7F0E6]">
+              <img
+                v-if="item.imageUrl"
+                :src="imageUrl(item.imageUrl)"
+                :alt="item.productName"
+                class="h-full w-full object-cover"
+              />
+              <i v-else class="mdi mdi-shopping-outline text-xl text-[#D96C2C]"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-black text-[#332820]">{{ item.productName }}</p>
+              <p class="mt-0.5 text-xs font-semibold text-[#786B62]">
+                ฿ {{ Number(item.unitPrice).toLocaleString('th-TH') }} × {{ item.quantity }} ชิ้น
+              </p>
+            </div>
+          </div>
+          <p class="shrink-0 text-sm font-black text-[#D96C2C]">
+            ฿ {{ Number(item.totalPrice).toLocaleString('th-TH') }}
+          </p>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- FULFILLMENT & SHIPPING FULFILL SECTION -->
     <ShipmentFulfillmentForm
       v-if="
         order.paymentStatus === 'Paid' &&
-        order.orderStatus !== 'Shipped' &&
-        order.orderStatus !== 'Completed' &&
-        order.orderStatus !== 'Cancelled'
+        order.orderStatus === 'Processing'
       "
       :updating="updatingId === order.orderId"
       @submit="emit('ship-order', { order, ...$event })"
