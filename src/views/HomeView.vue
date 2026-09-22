@@ -13,6 +13,8 @@ import { getShops } from '@/features/shops/public/api/shopApi'
 import type { Shop } from '@/features/shops/shared/types/shop'
 import type { Product } from '@/features/shops/shared/types/product'
 import { getActiveDealProducts, getPublicProducts } from '@/features/shops/api/productApi'
+import { toUtcMilliseconds } from '@/shared/composables/useDealCountdown'
+import { dealLabel, dealPrice } from '@/shared/utils/productDeal'
 import heroCoverImage from '@/assets/รูปปก.png'
 
 const router = useRouter()
@@ -33,7 +35,9 @@ let dealCountdownTimer: ReturnType<typeof window.setInterval> | undefined
 const visibleDealProducts = computed(() => {
   return activeDealProducts.value.filter((product) => {
     const deal = product.activeDeal
-    return !!deal && deal.availableQuantity > 0 && new Date(deal.endsAt).getTime() > currentTime.value
+    return (
+      !!deal && deal.availableQuantity > 0 && toUtcMilliseconds(deal.endsAt) > currentTime.value
+    )
   })
 })
 
@@ -117,20 +121,6 @@ function getProductCover(prod: Product, idx: number) {
   return defaultProductCovers[idx % defaultProductCovers.length]
 }
 
-function dealPrice(product: Product) {
-  const deal = product.activeDeal
-
-  if (!deal) {
-    return product.price
-  }
-
-  if (deal.discountType === 'Percent') {
-    return product.price * (1 - deal.discountValue / 100)
-  }
-
-  return Math.max(0, product.price - deal.discountValue)
-}
-
 function discountLabel(product: Product) {
   const deal = product.activeDeal
 
@@ -144,7 +134,10 @@ function discountLabel(product: Product) {
 }
 
 function remainingDealTime(endsAt: string) {
-  const seconds = Math.max(0, Math.floor((new Date(endsAt).getTime() - currentTime.value) / 1000))
+  const seconds = Math.max(
+    0,
+    Math.floor((toUtcMilliseconds(endsAt) - currentTime.value) / 1000),
+  )
   const days = Math.floor(seconds / 86400)
   const hours = Math.floor((seconds % 86400) / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
@@ -226,7 +219,8 @@ async function loadHomeData() {
     ])
 
     products.value = productResult.status === 'fulfilled' ? productResult.value.slice(0, 4) : []
-    activeDealProducts.value = dealProductResult.status === 'fulfilled' ? dealProductResult.value : []
+    activeDealProducts.value =
+      dealProductResult.status === 'fulfilled' ? dealProductResult.value : []
   } catch {
     /* ignore */
   }
@@ -520,11 +514,17 @@ onUnmounted(() => {
                 class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
               />
               <div class="absolute left-2 top-2 flex flex-col gap-1.5">
-                <span class="rounded-full bg-rose-600 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">
+                <span
+                  class="rounded-full bg-rose-600 px-2.5 py-1 text-[10px] font-black text-white shadow-sm"
+                >
                   <i class="mdi mdi-lightning-bolt-outline mr-0.5"></i>
-                  {{ product.activeDeal?.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}
+                  {{
+                    dealLabel(product)
+                  }}
                 </span>
-                <span class="w-fit rounded-full bg-[#332820]/85 px-2.5 py-1 text-[10px] font-black text-white">
+                <span
+                  class="w-fit rounded-full bg-[#332820]/85 px-2.5 py-1 text-[10px] font-black text-white"
+                >
                   {{ discountLabel(product) }}
                 </span>
               </div>
@@ -534,23 +534,33 @@ onUnmounted(() => {
               <p class="line-clamp-1 text-[11px] font-bold text-[#786B62]">
                 {{ product.shopName || 'ร้านค้าชุมชน' }}
               </p>
-              <h3 class="mt-1 line-clamp-2 text-sm font-black leading-snug text-[#332820] transition group-hover:text-rose-700 sm:text-base">
+              <h3
+                class="mt-1 line-clamp-2 text-sm font-black leading-snug text-[#332820] transition group-hover:text-rose-700 sm:text-base"
+              >
                 {{ product.productName }}
               </h3>
 
               <div class="mt-2 flex flex-wrap items-baseline gap-x-2">
                 <span class="text-base font-black text-rose-700 sm:text-lg">
-                  ฿{{ Number(dealPrice(product)).toLocaleString('th-TH', { maximumFractionDigits: 2 }) }}
+                  ฿{{
+                    Number(dealPrice(product)).toLocaleString('th-TH', { maximumFractionDigits: 2 })
+                  }}
                 </span>
                 <span class="text-xs font-semibold text-[#786B62] line-through">
                   ฿{{ Number(product.price).toLocaleString('th-TH') }}
                 </span>
               </div>
 
-              <div class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-rose-800">
+              <div
+                class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-rose-800"
+              >
                 <div class="flex items-center justify-between gap-2 text-[11px] font-black">
-                  <span class="flex items-center gap-1"><i class="mdi mdi-clock-outline"></i>เหลือเวลา</span>
-                  <span class="tabular-nums">{{ remainingDealTime(product.activeDeal!.endsAt) }}</span>
+                  <span class="flex items-center gap-1"
+                    ><i class="mdi mdi-clock-outline"></i>เหลือเวลา</span
+                  >
+                  <span class="tabular-nums">{{
+                    remainingDealTime(product.activeDeal!.endsAt)
+                  }}</span>
                 </div>
                 <p class="mt-1 text-[10px] font-bold text-rose-700">
                   เหลือ {{ product.activeDeal?.availableQuantity }} สิทธิ์

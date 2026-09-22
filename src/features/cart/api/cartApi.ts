@@ -11,6 +11,10 @@ export interface CartItem {
   availableQuantity: number
   unitPrice: number
   originalPrice?: number
+  dealQuantity: number
+  normalQuantity: number
+  dealUnitPrice: number
+  normalUnitPrice: number
   dealType?: string | null
   dealDiscountValue?: number | null
   dealEndsAt?: string | null

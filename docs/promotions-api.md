@@ -56,6 +56,8 @@
 - `discountType`: `Percent` หรือ `FixedAmount`
 - ส่วนลดต้องมากกว่า 0; เปอร์เซ็นต์ต้องน้อยกว่า 100; ลดบาทต้องน้อยกว่าราคาสินค้า
 - เวลาสิ้นสุดต้องมากกว่าเวลาเริ่ม
+- สิทธิ์ดีลที่ยังเหลือรวมกับดีลอื่นของสินค้านั้น ต้องไม่เกินสต็อกสินค้าปัจจุบัน
+- จำนวนสิทธิ์ทั้งหมดต้องไม่น้อยกว่าจำนวนที่ลูกค้าใช้ไปแล้ว
 
 ## แก้ไข / หยุดโปรโมชัน
 
@@ -76,6 +78,7 @@
     "discountType": "Percent",
     "discountValue": 20,
     "remainingQuantity": 17,
+    "availableQuantity": 12,
     "endsAt": "2026-09-22T14:00:00"
   }
 }
@@ -83,17 +86,46 @@
 
 ราคาดีล: `Percent` = `price * (1 - discountValue / 100)`, `FixedAmount` = `price - discountValue` ใช้เพื่อแสดงผลเท่านั้น
 
+- `remainingQuantity` คือสิทธิ์ในดีลที่ยังไม่ได้ใช้
+- `availableQuantity` คือจำนวนที่ลูกค้าซื้อด้วยดีลได้จริง: ค่าน้อยสุดระหว่างสต็อกสินค้าและ `remainingQuantity`
+- Flutter ต้องใช้ `quantity` หรือ `availableQuantity` ของสินค้าเป็นจำนวนสูงสุดของตัวเลือกจำนวนสินค้า ไม่จำกัดจำนวนเลือกด้วยสิทธิ์ดีล เพราะจำนวนที่เกินสิทธิ์ยังซื้อได้ในราคาปกติ
+
+## สินค้าโปรโมชันพิเศษบนหน้าแรก (Public)
+
+`GET /products/deals/active?limit=12`
+
+ไม่ต้องส่ง token ใช้แสดงส่วน “โปรโมชันพิเศษ” ของหน้าแรก หรือหน้า Discover ใน Flutter โดย `limit` เป็น optional และระบบจำกัดค่าไว้ที่ 1–24 รายการ
+
+API คืนเฉพาะสินค้า/ร้านที่ยัง `Active`, มีสต็อก, ดีลเริ่มแล้ว, ยังไม่เกิน `endsAt` และยังซื้อด้วยสิทธิ์ดีลได้จริง ผลลัพธ์เป็น `ProductDto[]` และมี `shopName` กับ `activeDeal`
+
+```json
+[
+  {
+    "productId": "guid",
+    "shopId": "guid",
+    "shopName": "ร้านชุมชนตัวอย่าง",
+    "productName": "ผ้าทอพื้นเมือง",
+    "price": 500,
+    "quantity": 2,
+    "imageUrl": "/uploads/products/example.jpg",
+    "activeDeal": {
+      "productDealId": "guid",
+      "dealType": "FlashDeal",
+      "discountType": "Percent",
+      "discountValue": 20,
+      "remainingQuantity": 3,
+      "availableQuantity": 2,
+      "endsAt": "2026-09-22T14:00:00Z"
+    }
+  }
+]
+```
+
+แต่ละการ์ดต้องนับถอยหลังจาก `activeDeal.endsAt` ของตัวเอง ไม่ใช้เวลาร่วมกันทั้งรายการ เมื่อเวลาเป็นศูนย์หรือ `availableQuantity` เป็นศูนย์ ให้ซ่อนเฉพาะการ์ดนั้น แล้วโหลด API ใหม่ตามความเหมาะสม
+
 ## ตะกร้าและ Checkout
 
-`GET /cart` ส่งราคาที่ Backend คำนวณแล้วต่อรายการ:
-
-- `originalPrice` ราคาปกติ
-- `unitPrice` ราคาหลังลดหรือราคาปกติ
-- `dealType`, `dealDiscountValue`, `dealEndsAt` เมื่อมีดีล
-
-Flutter ต้องใช้ `unitPrice` และ `subtotal` จาก API เป็นยอดแสดงผลเสมอ ห้ามส่งราคาจากแอปไปตัดสินยอดซื้อ
-
-เมื่อ checkout ระบบตรวจเวลา, สถานะ, สิทธิ์คงเหลือ และคำนวณราคาอีกครั้ง จากนั้นเพิ่ม `usedQuantity` ใน transaction เดียวกัน หากสิทธิ์ถูกใช้พร้อมกันจนไม่พอ API จะตอบข้อผิดพลาด ให้โหลดตะกร้าใหม่และแจ้งผู้ใช้
+รายละเอียดฟิลด์ `dealQuantity`, `normalQuantity` และการคิดราคากรณีลูกค้าซื้อเกินสิทธิ์ดีล อยู่ที่ [cart-promotion-pricing-api.md](./cart-promotion-pricing-api.md)
 
 ## Dashboard วิเคราะห์โปรโมชัน (Merchant)
 

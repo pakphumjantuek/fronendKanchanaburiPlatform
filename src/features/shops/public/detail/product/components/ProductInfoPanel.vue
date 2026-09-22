@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { Product, Shop } from '@/features/shops/api'
+import { useDealCountdown } from '@/shared/composables/useDealCountdown'
+import { dealLabel, dealPrice } from '@/shared/utils/productDeal'
 
 const props = defineProps<{
   product: Product
@@ -13,31 +14,9 @@ const props = defineProps<{
 }>()
 
 const quantity = defineModel<number>('quantity', { default: 1 })
-const now = ref(Date.now())
-let dealTimer: ReturnType<typeof setInterval> | undefined
-function toUtcMilliseconds(value: string) {
-  const isoValue = value.replace(' ', 'T')
-  return new Date(/(?:Z|[+-]\d{2}:\d{2})$/i.test(isoValue) ? isoValue : `${isoValue}Z`).getTime()
-}
-const dealRemaining = computed(() => {
-  const end = props.product.activeDeal?.endsAt
-  if (!end) return ''
-  const seconds = Math.max(0, Math.ceil((toUtcMilliseconds(end) - now.value) / 1000))
-  return `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String(Math.floor((seconds % 3600) / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
-})
-const isDealFinished = computed(
-  () =>
-    !!props.product.activeDeal?.endsAt &&
-    toUtcMilliseconds(props.product.activeDeal.endsAt) <= now.value,
+const { isFinished: isDealFinished, remaining: dealRemaining } = useDealCountdown(
+  () => props.product.activeDeal?.endsAt,
 )
-onMounted(() => {
-  dealTimer = setInterval(() => {
-    now.value = Date.now()
-  }, 1000)
-})
-onBeforeUnmount(() => {
-  if (dealTimer) clearInterval(dealTimer)
-})
 
 const emit = defineEmits<{
   (e: 'add-to-cart'): void
@@ -63,13 +42,6 @@ function validateQty() {
     quantity.value = props.maxQuantity
   }
 }
-function dealPrice() {
-  const deal = props.product.activeDeal
-  if (!deal) return props.product.price
-  return deal.discountType === 'Percent'
-    ? props.product.price * (1 - deal.discountValue / 100)
-    : props.product.price - deal.discountValue
-}
 </script>
 
 <template>
@@ -79,7 +51,7 @@ function dealPrice() {
         v-if="product.activeDeal"
         class="inline-flex items-center gap-1 rounded-full bg-rose-600 px-3 py-1 text-sm font-bold text-white"
         ><i class="mdi mdi-lightning-bolt-outline"></i
-        >{{ product.activeDeal.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</span
+        >{{ dealLabel(product) }}</span
       >
       <span
         class="inline-flex items-center gap-1 px-3.5 py-1 rounded-full text-sm font-semibold bg-[#D96C2C]/10 text-[#D96C2C] border border-[#D96C2C]/20"
@@ -153,7 +125,7 @@ function dealPrice() {
           formatPrice(product.price)
         }}</span>
         <span class="text-4xl sm:text-5xl font-bold text-[#D96C2C] tracking-tight">{{
-          formatPrice(dealPrice())
+          formatPrice(dealPrice(product))
         }}</span>
       </div>
 
@@ -197,7 +169,8 @@ function dealPrice() {
       </div>
       <span class="text-xs sm:text-sm text-[#786B62] font-medium">
         <template v-if="product.activeDeal">
-          (มีสินค้า {{ product.quantity }} ชิ้น · ใช้สิทธิ์ได้ {{ product.activeDeal.availableQuantity }} ชิ้น)
+          (มีสินค้า {{ product.quantity }} ชิ้น · ใช้สิทธิ์ได้
+          {{ product.activeDeal.availableQuantity }} ชิ้น)
         </template>
         <template v-else>(สูงสุด {{ product.quantity }} ชิ้น)</template>
       </span>

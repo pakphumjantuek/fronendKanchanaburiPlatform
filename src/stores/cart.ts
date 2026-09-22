@@ -19,7 +19,7 @@ export const useCartStore = defineStore('cart', () => {
     cart.value.items.reduce((count, item) => count + item.quantity, 0),
   )
   const total = computed(() =>
-    cart.value.items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0),
+    cart.value.items.reduce((sum, item) => sum + Number(item.subtotal), 0),
   )
 
   async function load() {
@@ -42,13 +42,12 @@ export const useCartStore = defineStore('cart', () => {
     }
 
     await updateCartItem(cartItemId, quantity)
-    const item = cart.value.items.find((cartItem) => cartItem.cartItemId === cartItemId)
-    if (item) item.quantity = quantity
+    await load()
   }
 
   async function remove(cartItemId: string) {
     await removeCartItem(cartItemId)
-    cart.value.items = cart.value.items.filter((item) => item.cartItemId !== cartItemId)
+    await load()
   }
 
   function clear() {

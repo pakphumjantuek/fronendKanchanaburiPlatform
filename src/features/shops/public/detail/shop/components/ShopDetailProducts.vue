@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Product, ProductCategory, Shop } from '@/features/shops/api'
+import { dealLabel, dealPrice } from '@/shared/utils/productDeal'
 
 const props = defineProps<{
   shop: Shop
@@ -205,9 +206,9 @@ function clearFilters() {
 
           <!-- Price & Discount -->
           <div class="flex items-baseline gap-2 mt-2">
-            <span v-if="prod.activeDeal" class="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-black text-white">{{ prod.activeDeal.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</span>
+            <span v-if="prod.activeDeal" class="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-black text-white">{{ dealLabel(prod) }}</span>
             <span class="font-black text-amber-700 text-base sm:text-lg">{{
-              formatPrice(prod.activeDeal ? (prod.activeDeal.discountType === 'Percent' ? prod.price * (1 - prod.activeDeal.discountValue / 100) : prod.price - prod.activeDeal.discountValue) : prod.price)
+              formatPrice(dealPrice(prod))
             }}</span>
             <span v-if="prod.activeDeal" class="text-xs text-[#786B62] line-through font-semibold">
               {{ formatPrice(prod.price) }}

@@ -47,9 +47,13 @@ function handleDrop(event: DragEvent) {
 }
 
 function setFile(file: File) {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp']
   const maxFileSize = 5 * 1024 * 1024
-  if (!allowedTypes.includes(file.type) || file.size > maxFileSize) {
+  const extension = file.name.split('.').pop()?.toLowerCase() ?? ''
+  const hasSupportedType = allowedTypes.includes(file.type) || allowedExtensions.includes(extension)
+
+  if (!hasSupportedType || file.size > maxFileSize) {
     void swal.error('ไฟล์ไม่ถูกต้อง', 'รองรับไฟล์ JPG, PNG หรือ WEBP ขนาดไม่เกิน 5 MB')
     return
   }
@@ -136,7 +140,7 @@ function onSubmit() {
       >
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
           class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
           @change="handleFileChange"
         />

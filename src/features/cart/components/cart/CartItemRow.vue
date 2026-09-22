@@ -50,11 +50,17 @@ function imageUrl(url?: string) {
       <div class="flex items-center gap-2 text-sm text-[#786B62]">
         <span v-if="props.item.dealType" class="rounded-md bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">{{ props.item.dealType === 'FlashDeal' ? 'โปรโมชันพิเศษ' : 'โปรเด็ดชุมชน' }}</span>
         <span v-if="props.item.dealType && props.item.originalPrice" class="text-xs text-[#786B62] line-through">฿ {{ Number(props.item.originalPrice).toLocaleString('th-TH') }}</span>
-        <span
-          class="font-semibold text-[#D96C2C] bg-[#D96C2C]/10 px-2.5 py-0.5 rounded-md border border-[#D96C2C]/20"
-        >
-          ฿ {{ Number(props.item.unitPrice).toLocaleString('th-TH') }} / ชิ้น
-        </span>
+      </div>
+
+      <div class="mt-2 space-y-1 rounded-xl bg-[#F7F0E6] px-3 py-2 text-xs font-semibold text-[#786B62]">
+        <p v-if="props.item.dealQuantity > 0" class="flex justify-between gap-3 text-rose-700">
+          <span>โปรโมชันพิเศษ {{ props.item.dealQuantity }} ชิ้น × ฿{{ Number(props.item.dealUnitPrice).toLocaleString('th-TH') }}</span>
+          <span>฿{{ (props.item.dealQuantity * props.item.dealUnitPrice).toLocaleString('th-TH') }}</span>
+        </p>
+        <p v-if="props.item.normalQuantity > 0" class="flex justify-between gap-3">
+          <span>ราคาปกติ {{ props.item.normalQuantity }} ชิ้น × ฿{{ Number(props.item.normalUnitPrice).toLocaleString('th-TH') }}</span>
+          <span>฿{{ (props.item.normalQuantity * props.item.normalUnitPrice).toLocaleString('th-TH') }}</span>
+        </p>
       </div>
 
       <!-- Item Total Price & Controls -->
@@ -97,7 +103,7 @@ function imageUrl(url?: string) {
           <div class="text-right">
             <span class="text-xs text-[#786B62] block font-medium">รวม</span>
             <span class="text-xl font-bold text-[#D96C2C]">
-              ฿ {{ (props.item.unitPrice * props.item.quantity).toLocaleString('th-TH') }}
+              ฿ {{ Number(props.item.subtotal).toLocaleString('th-TH') }}
             </span>
           </div>
 
