@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 interface Props {
   orderNumber: string
   createdAt: string
@@ -17,19 +18,7 @@ function getStatusTitle(status: string) {
   return status
 }
 
-function formatDate(dateStr: string) {
-  try {
-    return new Date(dateStr).toLocaleString('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return dateStr
-  }
-}
+
 </script>
 
 <template>
@@ -45,7 +34,7 @@ function formatDate(dateStr: string) {
       </div>
       <p class="mt-1 text-xs text-[#F7F0E6]/80 flex items-center gap-1 font-semibold">
         <i class="mdi mdi-clock-outline text-[#F2A65A]"></i>
-        <span>สั่งซื้อเมื่อ: {{ formatDate(props.createdAt) }}</span>
+        <span>สั่งซื้อเมื่อ: {{ formatDate(props.createdAt, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
       </p>
     </div>
 

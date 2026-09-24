@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { youtubeThumbnail } from '@/shared/utils/youtube'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -23,18 +24,7 @@ const KANCHANABURI_BOUNDS: L.LatLngBoundsExpression = [
   [15.85, 100.00], // North-East Boundary
 ]
 
-function youtubeThumbnail(url?: string) {
-  if (!url) return ''
-  try {
-    const parsed = new URL(url)
-    const id = parsed.hostname.includes('youtu.be')
-      ? parsed.pathname.slice(1)
-      : (parsed.searchParams.get('v') ?? parsed.pathname.split('/').filter(Boolean).pop())
-    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ''
-  } catch {
-    return ''
-  }
-}
+
 
 function initMap() {
   if (!mapContainer.value || map) return

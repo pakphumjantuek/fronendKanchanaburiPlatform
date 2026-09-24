@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { nextTick, onMounted, ref, watch } from 'vue'
 import {
   Chart,
@@ -68,16 +69,7 @@ function formatCurrency(amount: number = 0) {
   return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(amount)
 }
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+
 
 function formatThaiDateShort(dateStr?: string) {
   if (!dateStr) return '-'
@@ -742,7 +734,7 @@ onMounted(() => {
                   </span>
                 </div>
                 <p class="text-xs text-[#786B62]">
-                  สร้างเมื่อ: {{ formatDate(order.createdAt) }}
+                  สร้างเมื่อ: {{ formatDate(order.createdAt, { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) }}
                 </p>
               </div>
 

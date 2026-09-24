@@ -110,7 +110,7 @@
                 <span class="font-bold text-[#332820] text-base block">{{ sch.title }}</span>
                 <p class="text-sm text-[#4A3E35] flex items-center gap-1.5 font-medium">
                   <i class="mdi mdi-clock-outline text-[#D96C2C]"></i>
-                  <span>{{ formatDate(sch.startDateTime) }}</span>
+                  <span>{{ formatDate(sch.startDateTime, { dateStyle: 'long' }) }}</span>
                 </p>
                 <p
                   v-if="sch.address"
@@ -239,6 +239,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -262,7 +263,7 @@ import {
   type ContentShopProduct,
   type PublicContent,
 } from '@/features/contents/api'
-import { getShop, getShops } from '@/features/shops/public/api/shopApi'
+import { getShop, getShops } from '@/features/shops/api/shopApi'
 import type { Shop } from '@/features/shops/shared/types/shop'
 import { useSwal } from '@/plugins/sweetalert'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
@@ -302,11 +303,11 @@ function getSpecialFieldValue(key: string): string {
 
   switch (key) {
     case 'eventDate':
-      return sch?.startDateTime ? formatDate(sch.startDateTime) : 'ตามช่วงเทศกาลที่กำหนด'
+      return sch?.startDateTime ? formatDate(sch.startDateTime, { dateStyle: 'long' }) : 'ตามช่วงเทศกาลที่กำหนด'
     case 'eventTime':
     case 'showDateTime':
     case 'openHours':
-      return sch?.title || (sch?.startDateTime ? formatDate(sch.startDateTime) : 'โปรดตรวจสอบรอบจัดงาน')
+      return sch?.title || (sch?.startDateTime ? formatDate(sch.startDateTime, { dateStyle: 'long' }) : 'โปรดตรวจสอบรอบจัดงาน')
     case 'location':
     case 'areaName':
       return (
@@ -365,10 +366,7 @@ const loading = ref(true)
 const id = computed(() => (typeof route.params.id === 'string' ? route.params.id : ''))
 const isOwnerPreview = computed(() => route.query.preview === 'mine')
 
-function formatDate(value?: string) {
-  if (!value) return '-'
-  return new Intl.DateTimeFormat('th-TH', { dateStyle: 'long' }).format(new Date(value))
-}
+
 
 async function load() {
   if (!id.value) return

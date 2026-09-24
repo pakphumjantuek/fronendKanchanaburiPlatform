@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { computed, onMounted, ref } from 'vue'
 import { archiveSchedule, getSchedules, type Schedule } from '../api/adminScheduleApi'
 import AppDataTable, { type DataTableColumn } from '@/components/common/AppDataTable.vue'
@@ -30,7 +31,7 @@ async function archive(schedule: Schedule) {
 }
 function statusLabel(status: string) { return status === 'Active' ? 'เปิดใช้งาน' : status === 'Cancelled' ? 'ยกเลิกแล้ว' : 'ปิดใช้งาน' }
 function statusClass(status: string) { return status === 'Active' ? 'bg-emerald-100 text-emerald-700' : status === 'Cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700' }
-function formatDate(value: string) { return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) }
+
 function asSchedule(item: object) { return item as Schedule }
 onMounted(load)
 </script>
@@ -43,7 +44,7 @@ onMounted(load)
     </div>
     <AppDataTable :columns="columns" :items="schedules" row-key="scheduleId" :loading="loading" :pagination="pagination" empty-message="ยังไม่มีกำหนดการ">
       <template #cell-title="{ item }"><div><p class="font-semibold text-slate-900">{{ asSchedule(item).title }}</p><p v-if="asSchedule(item).address" class="mt-1 text-xs text-slate-500"><i class="mdi mdi-map-marker-outline" /> {{ asSchedule(item).address }}</p></div></template>
-      <template #cell-startDateTime="{ item }">{{ formatDate(asSchedule(item).startDateTime) }}</template>
+      <template #cell-startDateTime="{ item }">{{ formatDate(asSchedule(item).startDateTime, { dateStyle: 'medium', timeStyle: 'short' }) }}</template>
       <template #cell-status="{ item }"><span class="rounded-full px-2.5 py-1 text-xs font-bold" :class="statusClass(asSchedule(item).status)">{{ statusLabel(asSchedule(item).status) }}</span></template>
       <template #cell-actions="{ item }"><RouterLink :to="`/admin/schedules/${asSchedule(item).scheduleId}/edit`" class="mr-3 font-semibold text-indigo-600">แก้ไข</RouterLink><button v-if="asSchedule(item).status === 'Active'" class="font-semibold text-rose-600" @click="archive(asSchedule(item))">ปิดใช้งาน</button></template>
     </AppDataTable>

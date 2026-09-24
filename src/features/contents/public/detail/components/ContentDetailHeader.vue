@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import type { PublicContent } from '../../api/contentApi'
 
 interface Props {
@@ -30,10 +31,7 @@ function youtubeEmbedUrl(url?: string) {
   }
 }
 
-function formatDate(value?: string) {
-  if (!value) return '-'
-  return new Intl.DateTimeFormat('th-TH', { dateStyle: 'long' }).format(new Date(value))
-}
+
 </script>
 
 <template>
@@ -128,7 +126,7 @@ function formatDate(value?: string) {
             <div class="flex items-center gap-3">
               <span class="flex items-center gap-1.5 font-medium text-slate-600"
                 ><i class="mdi mdi-clock-outline text-slate-400 text-sm"></i>
-                {{ formatDate(content.publishedAt || content.createdAt) }}</span
+                {{ formatDate(content.publishedAt || content.createdAt, { dateStyle: 'long' }) }}</span
               >
             </div>
 

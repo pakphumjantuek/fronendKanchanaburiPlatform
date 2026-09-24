@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
+import { youtubeThumbnail } from '@/shared/utils/youtube'
 import type { ContentViewHistory } from '../api/profileApi'
 
 interface Props {
@@ -7,29 +9,9 @@ interface Props {
 
 defineProps<Props>()
 
-function formatDate(value: string) {
-  if (!value) return '-'
-  try {
-    return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short' }).format(
-      new Date(value),
-    )
-  } catch {
-    return value
-  }
-}
 
-function youtubeThumbnail(url?: string | null) {
-  if (!url) return ''
-  try {
-    const parsed = new URL(url)
-    const id = parsed.hostname.includes('youtu.be')
-      ? parsed.pathname.slice(1)
-      : (parsed.searchParams.get('v') ?? '')
-    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ''
-  } catch {
-    return ''
-  }
-}
+
+
 </script>
 
 <template>
@@ -101,7 +83,7 @@ function youtubeThumbnail(url?: string | null) {
             </p>
             <span class="text-[11px] text-[#786B62] font-semibold flex items-center gap-1">
               <i class="mdi mdi-clock-outline text-[#D96C2C]"></i>
-              เข้าชมเมื่อ: {{ formatDate(item.viewedAt) }}
+              เข้าชมเมื่อ: {{ formatDate(item.viewedAt, { dateStyle: 'medium', timeStyle: 'short' }) }}
             </span>
           </div>
         </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 export interface OrderSummary {
   orderId: string
@@ -63,19 +64,7 @@ function getStatusIcon(status: string) {
   return 'mdi-tag-outline'
 }
 
-function formatDate(dateStr: string) {
-  try {
-    return new Date(dateStr).toLocaleString('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return dateStr
-  }
-}
+
 </script>
 
 <template>
@@ -93,7 +82,7 @@ function formatDate(dateStr: string) {
         </div>
         <p class="mt-0.5 text-xs text-[#786B62] font-semibold flex items-center gap-1">
           <i class="mdi mdi-clock-outline text-[#D96C2C]"></i>
-          <span>{{ formatDate(props.order.createdAt) }}</span>
+          <span>{{ formatDate(props.order.createdAt, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
         </p>
       </div>
 

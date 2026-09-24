@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import type { ContentReview, ContentReviews } from '../../api/contentApi'
 
 interface Props {
@@ -17,10 +18,7 @@ const emit = defineEmits<{
   'remove-review': []
 }>()
 
-function formatDate(value?: string) {
-  if (!value) return '-'
-  return new Intl.DateTimeFormat('th-TH', { dateStyle: 'long' }).format(new Date(value))
-}
+
 
 function getUserInitials(name?: string) {
   if (!name) return 'U'
@@ -130,7 +128,7 @@ function getUserInitials(name?: string) {
             </div>
             <div>
               <h4 class="font-bold text-[#332820] text-sm sm:text-base leading-tight">{{ rev.userName }}</h4>
-              <p class="text-xs text-[#4A3E35] font-normal">{{ formatDate(rev.createdAt) }}</p>
+              <p class="text-xs text-[#4A3E35] font-normal">{{ formatDate(rev.createdAt, { dateStyle: 'long' }) }}</p>
             </div>
           </div>
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 export interface OrderItem {
@@ -103,17 +104,7 @@ function imageUrl(url?: string | null) {
   return url.startsWith('/') ? `${apiOrigin}${url}` : url
 }
 
-function formatDate(dateStr: string) {
-  try {
-    return new Date(dateStr).toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch {
-    return dateStr
-  }
-}
+
 
 // Counts for filter pills
 const counts = computed(() => {

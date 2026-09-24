@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { onMounted, ref } from 'vue'
 import http from '@/shared/api/http'
 import { useSwal } from '@/plugins/sweetalert'
@@ -58,16 +59,7 @@ function imageUrl(url?: string) {
   return url.startsWith('/') ? `${apiOrigin}${url}` : url
 }
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(amount)
@@ -179,7 +171,7 @@ onMounted(loadPendingSlips)
                 </span>
               </div>
               <p class="text-xs text-[#786B62] font-semibold mt-0.5">
-                ผู้สั่งซื้อ: <strong class="text-[#332820]">{{ group.buyerName || 'ลูกค้าทั่วไป' }}</strong> ({{ group.buyerPhone || '-' }}) | โอนเมื่อ: {{ formatDate(group.slipUploadedAt) }}
+                ผู้สั่งซื้อ: <strong class="text-[#332820]">{{ group.buyerName || 'ลูกค้าทั่วไป' }}</strong> ({{ group.buyerPhone || '-' }}) | โอนเมื่อ: {{ formatDate(group.slipUploadedAt, { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) }}
               </p>
             </div>
           </div>

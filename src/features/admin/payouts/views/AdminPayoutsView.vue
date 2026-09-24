@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { onMounted, ref } from 'vue'
 import http from '@/shared/api/http'
 import { useSwal } from '@/plugins/sweetalert'
@@ -81,16 +82,7 @@ function formatCurrency(amount: number) {
   return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(amount)
 }
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+
 
 const historyLoading = ref(false)
 
@@ -409,7 +401,7 @@ onMounted(loadData)
                 </span>
               </div>
               <p class="text-xs text-[#786B62] font-semibold mt-0.5">
-                โอนเมื่อ: {{ formatDate(record.createdAt) }} | {{ record.ordersCount }} ออเดอร์
+                โอนเมื่อ: {{ formatDate(record.createdAt, { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) }} | {{ record.ordersCount }} ออเดอร์
                 <span v-if="record.transactionRef" class="ml-2 text-[#332820]">Ref: {{ record.transactionRef }}</span>
               </p>
               <p v-if="record.note" class="text-xs text-[#D96C2C] font-semibold mt-0.5">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { youtubeThumbnail } from '@/shared/utils/youtube'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -9,7 +10,7 @@ import {
   type District,
   type PublicContent,
 } from '@/features/contents/public/api/contentApi'
-import { getShops } from '@/features/shops/public/api/shopApi'
+import { getShops } from '@/features/shops/api/shopApi'
 import type { Shop } from '@/features/shops/shared/types/shop'
 import type { Product } from '@/features/shops/shared/types/product'
 import { getActiveDealProducts, getPublicProducts } from '@/features/shops/api/productApi'
@@ -159,18 +160,7 @@ function handleSearch(queryText?: string) {
   }
 }
 
-function youtubeThumbnail(url?: string) {
-  if (!url) return ''
-  try {
-    const parsed = new URL(url)
-    const id = parsed.hostname.includes('youtu.be')
-      ? parsed.pathname.slice(1)
-      : (parsed.searchParams.get('v') ?? parsed.pathname.split('/').filter(Boolean).pop())
-    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ''
-  } catch {
-    return ''
-  }
-}
+
 
 function handleScroll() {
   scrollY.value = window.scrollY

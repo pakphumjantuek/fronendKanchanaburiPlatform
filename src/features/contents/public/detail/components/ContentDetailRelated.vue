@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { youtubeThumbnail } from '@/shared/utils/youtube'
 import type { PublicContent } from '../../api/contentApi'
 
 interface Props {
@@ -7,18 +8,7 @@ interface Props {
 
 defineProps<Props>()
 
-function youtubeThumbnail(url?: string) {
-  if (!url) return ''
-  try {
-    const parsed = new URL(url)
-    const id = parsed.hostname.includes('youtu.be')
-      ? parsed.pathname.slice(1)
-      : (parsed.searchParams.get('v') ?? parsed.pathname.split('/').filter(Boolean).pop())
-    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ''
-  } catch {
-    return ''
-  }
-}
+
 </script>
 
 <template>

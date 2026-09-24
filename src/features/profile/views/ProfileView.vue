@@ -122,7 +122,8 @@ import ProfileFavoritesList from '../components/ProfileFavoritesList.vue'
 import ProfileAddressList from '../components/ProfileAddressList.vue'
 import ProfileOrdersList, { type RichOrder } from '../components/ProfileOrdersList.vue'
 import ProfileMyShop from '../components/ProfileMyShop.vue'
-import { getMyShop, type Shop } from '@/features/shops/api'
+import { getMyShop } from '@/features/merchant/api/shopApi'
+import type { Shop } from '@/features/shops/shared/types/shop'
 
 const auth = useAuthStore()
 const route = useRoute()

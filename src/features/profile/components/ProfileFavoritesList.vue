@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
+import { youtubeThumbnail } from '@/shared/utils/youtube'
 import type { FavoriteContent } from '../api/profileApi'
 
 interface Props {
@@ -7,29 +9,9 @@ interface Props {
 
 defineProps<Props>()
 
-function formatDate(value: string) {
-  if (!value) return '-'
-  try {
-    return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short' }).format(
-      new Date(value),
-    )
-  } catch {
-    return value
-  }
-}
 
-function youtubeThumbnail(url?: string | null) {
-  if (!url) return ''
-  try {
-    const parsed = new URL(url)
-    const id = parsed.hostname.includes('youtu.be')
-      ? parsed.pathname.slice(1)
-      : (parsed.searchParams.get('v') ?? '')
-    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ''
-  } catch {
-    return ''
-  }
-}
+
+
 </script>
 
 <template>
@@ -107,7 +89,7 @@ function youtubeThumbnail(url?: string | null) {
 
           <div class="pt-3 border-t border-[#E8D9C9] flex items-center justify-between text-xs">
             <span class="text-[11px] text-[#786B62] font-semibold">
-              {{ formatDate(item.createdAt) }}
+              {{ formatDate(item.createdAt, { dateStyle: 'medium', timeStyle: 'short' }) }}
             </span>
 
             <RouterLink

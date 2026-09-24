@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
 import { onMounted, ref } from 'vue'
 import { archiveMyContent, getMyContents, type UserContent } from '@/features/contents/api'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
@@ -21,11 +22,7 @@ function statusClass(status: UserContent['status']) {
       : 'bg-slate-200 text-slate-700 border-slate-300'
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short' }).format(
-    new Date(value),
-  )
-}
+
 
 async function load() {
   loading.value = true
@@ -121,7 +118,7 @@ onMounted(load)
                 {{ statusLabel(item.status) }}
               </span>
               <span class="text-xs font-bold text-[#786B62]">
-                {{ formatDate(item.updatedAt) }}
+                {{ formatDate(item.updatedAt, { dateStyle: 'medium', timeStyle: 'short' }) }}
               </span>
             </div>
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatDate } from '@/shared/utils/formatDate'
+import { youtubeThumbnail } from '@/shared/utils/youtube'
 import type { PublicContent } from '../../api/contentApi'
 
 interface Props {
@@ -10,27 +12,9 @@ withDefaults(defineProps<Props>(), {
   displayMode: 'grid',
 })
 
-function youtubeThumbnail(url?: string) {
-  if (!url) return ''
-  try {
-    const parsed = new URL(url)
-    const id = parsed.hostname.includes('youtu.be')
-      ? parsed.pathname.slice(1)
-      : (parsed.searchParams.get('v') ?? parsed.pathname.split('/').filter(Boolean).pop())
-    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ''
-  } catch {
-    return ''
-  }
-}
 
-function formatPublishedDate(value?: string) {
-  if (!value) return 'เรื่องราวกาญจนบุรี'
-  return new Intl.DateTimeFormat('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value))
-}
+
+
 </script>
 
 <template>
@@ -101,7 +85,7 @@ function formatPublishedDate(value?: string) {
       <div class="flex items-center gap-3 text-[#786B62]">
         <span class="flex items-center gap-1.5">
           <i class="mdi mdi-calendar-blank-outline text-[#D96C2C] text-base"></i>
-          {{ formatPublishedDate(item.publishedAt ?? item.createdAt) }}
+          {{ formatDate(item.publishedAt ?? item.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }, 'เรื่องราวกาญจนบุรี') }}
         </span>
         <span class="flex items-center gap-1 text-[#D96C2C] font-bold">
           <i class="mdi mdi-eye-outline text-base"></i>
@@ -178,7 +162,7 @@ function formatPublishedDate(value?: string) {
         <div class="flex items-center gap-3">
           <span class="flex items-center gap-1.5 text-[#786B62]">
             <i class="mdi mdi-calendar-blank-outline text-[#D96C2C]"></i>
-            {{ formatPublishedDate(item.publishedAt ?? item.createdAt) }}
+            {{ formatDate(item.publishedAt ?? item.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }, 'เรื่องราวกาญจนบุรี') }}
           </span>
           <span class="flex items-center gap-1 text-[#D96C2C] font-bold">
             <i class="mdi mdi-eye-outline text-[#D96C2C]"></i>
