@@ -18,6 +18,7 @@ import {
 import { getMerchantDashboardReport, type MerchantDashboardReport } from '@/features/merchant/api/shopApi'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
 import { useSwal } from '@/plugins/sweetalert'
+import { imageUrl } from '@/shared/utils/imageUrl'
 
 Chart.register(
   LineController,
@@ -47,15 +48,6 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
 const swal = useSwal()
 
-const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
-  /\/api$/,
-  '',
-)
-
-function imageUrl(url?: string) {
-  if (!url) return ''
-  return url.startsWith('/') ? `${apiOrigin}${url}` : url
-}
 
 
 function getOrderStatusBadge(status: string) {

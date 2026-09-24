@@ -24,6 +24,7 @@ import AppTextarea from '@/components/common/input/AppTextarea.vue'
 import LocationPickerMap from '@/components/common/map/LocationPickerMap.vue'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
 import { useSwal } from '@/plugins/sweetalert'
+import { imageUrl } from '@/shared/utils/imageUrl'
 
 const shop = ref<Shop | null>(null)
 const categories = ref<ShopCategory[]>([])
@@ -35,10 +36,7 @@ const uploadingCover = ref(false)
 const uploadingBackground = ref(false)
 const restoringLocation = ref(false)
 const swal = useSwal()
-const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
-  /\/api$/,
-  '',
-)
+
 
 const form = ref<ShopFormData>({
   shopName: '',
@@ -81,9 +79,7 @@ function applyShop(data: Shop) {
   }
 }
 
-function imageUrl(url?: string) {
-  return url?.startsWith('/') ? `${apiOrigin}${url}` : url
-}
+
 
 async function loadSubDistricts(districtId: string | null, keepValue = false) {
   if (!districtId) {

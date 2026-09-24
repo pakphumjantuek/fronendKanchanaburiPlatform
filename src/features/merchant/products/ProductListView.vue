@@ -5,6 +5,7 @@ import { getMyShop } from '@/features/merchant/api/shopApi'
 import { getProducts, removeProduct, type Product } from '@/features/shops/api'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
 import { useSwal } from '@/plugins/sweetalert'
+import { imageUrl } from '@/shared/utils/imageUrl'
 
 const products = ref<Product[]>([])
 const hasShop = ref(false)
@@ -12,14 +13,6 @@ const shopId = ref<string>('')
 const loading = ref(true)
 const searchQuery = ref('')
 const swal = useSwal()
-const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
-  /\/api$/,
-  '',
-)
-
-function imageUrl(url?: string) {
-  return url?.startsWith('/') ? `${apiOrigin}${url}` : url
-}
 
 const filteredProducts = computed(() => {
   if (!searchQuery.value.trim()) return products.value

@@ -1,70 +1,16 @@
 <script setup lang="ts">
-import { formatDate } from '@/shared/utils/formatDate'
+import { formatCurrency, formatDate } from '@/shared/utils/formatDate'
 import { onMounted, ref } from 'vue'
 import http from '@/shared/api/http'
 import { useSwal } from '@/plugins/sweetalert'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
-
-interface OrderItem {
-  orderItemId: string
-  productId: string
-  productName: string
-  quantity: number
-  unitPrice: number
-  totalPrice: number
-}
-
-interface OrderDto {
-  orderId: string
-  orderNumber: string
-  subtotal: number
-  shippingFee: number
-  totalAmount: number
-  createdAt: string
-  items: OrderItem[]
-}
-
-interface MerchantPayoutRecord {
-  payoutId: string
-  shopId: string
-  shopName?: string
-  shopLogoUrl?: string
-  totalAmount: number
-  slipImageUrl?: string
-  transactionRef?: string
-  note?: string
-  status: string
-  createdAt: string
-  ordersCount: number
-  orders: OrderDto[]
-}
-
-interface MerchantPayoutSummary {
-  pendingPayoutAmount: number
-  totalPaidOutAmount: number
-  history: MerchantPayoutRecord[]
-}
+import type { MerchantPayoutSummary } from '../interface/type'
+import { imageUrl } from '@/shared/utils/imageUrl'
 
 const summary = ref<MerchantPayoutSummary | null>(null)
 const loading = ref(true)
 const selectedSlipUrl = ref<string | null>(null)
 const swal = useSwal()
-
-const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
-  /\/api$/,
-  '',
-)
-
-function imageUrl(url?: string) {
-  if (!url) return ''
-  return url.startsWith('/') ? `${apiOrigin}${url}` : url
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(amount)
-}
-
-
 
 async function loadMerchantPayouts() {
   loading.value = true

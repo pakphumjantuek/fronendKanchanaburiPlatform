@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { createDeal, getProductDeals, stopDeal, type ProductDeal } from '../api/productDealApi'
+import { createDeal, getProductDeals, stopDeal} from '../api/productDealApi'
 import { getMyShop } from '@/features/merchant/api/shopApi'
 import { getProducts, type Product } from '@/features/shops/api'
 import AppDataTable, { type DataTableColumn } from '@/components/common/AppDataTable.vue'
+import type { ProductDeal } from '../interface/type'
 const deals = ref<ProductDeal[]>([])
 const route = useRoute()
 const products = ref<Product[]>([])

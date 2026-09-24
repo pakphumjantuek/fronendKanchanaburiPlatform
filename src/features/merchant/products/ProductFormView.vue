@@ -18,6 +18,7 @@ import AppTextarea from '@/components/common/input/AppTextarea.vue'
 import AppFileInput from '@/components/common/input/AppFileInput.vue'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
 import { useSwal } from '@/plugins/sweetalert'
+import { imageUrl } from '@/shared/utils/imageUrl'
 
 const route = useRoute()
 const router = useRouter()
@@ -26,16 +27,6 @@ const loading = ref(true)
 const saving = ref(false)
 const swal = useSwal()
 const id = route.params.id as string | undefined
-
-const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
-  /\/api$/,
-  '',
-)
-
-function imageUrl(url?: string) {
-  if (!url) return undefined
-  return url.startsWith('/') ? `${apiOrigin}${url}` : url
-}
 
 const form = ref<ProductFormData>({
   shopId: '',
