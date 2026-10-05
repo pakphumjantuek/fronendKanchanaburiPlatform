@@ -1,69 +1,17 @@
 <script setup lang="ts">
-import { formatDate } from '@/shared/utils/formatDate'
+import { formatCurrency, formatDate } from '@/shared/utils/formatDate'
 import { onMounted, ref } from 'vue'
 import http from '@/shared/api/http'
 import { useSwal } from '@/plugins/sweetalert'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
-
-interface OrderItem {
-  orderItemId: string
-  productId: string
-  productName: string
-  quantity: number
-  unitPrice: number
-  totalPrice: number
-}
-
-interface OrderDto {
-  orderId: string
-  shopId: string
-  shopName?: string
-  shopLogoUrl?: string
-  orderNumber: string
-  subtotal: number
-  shippingFee: number
-  totalAmount: number
-  shippingMethod: string
-  orderStatus: string
-  paymentStatus: string
-  slipImageUrl?: string
-  slipUploadedAt?: string
-  createdAt: string
-  receiverName?: string
-  receiverPhone?: string
-  items: OrderItem[]
-}
-
-interface AdminPendingSlipGroup {
-  slipImageUrl: string
-  slipUploadedAt?: string
-  totalGroupAmount: number
-  buyerName?: string
-  buyerPhone?: string
-  orders: OrderDto[]
-}
+import { imageUrl } from '@/shared/utils/imageUrl'
+import type { AdminPendingSlipGroup } from '../interface/types'
 
 const groups = ref<AdminPendingSlipGroup[]>([])
 const loading = ref(true)
 const verifyingIndex = ref<number | null>(null)
 const selectedSlipUrl = ref<string | null>(null)
 const swal = useSwal()
-
-const apiOrigin = (import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api').replace(
-  /\/api$/,
-  '',
-)
-
-function imageUrl(url?: string) {
-  if (!url) return ''
-  return url.startsWith('/') ? `${apiOrigin}${url}` : url
-}
-
-
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(amount)
-}
 
 async function loadPendingSlips() {
   loading.value = true

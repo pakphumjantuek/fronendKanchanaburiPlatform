@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { categoryImageUrl, createCategory, deleteCategoryImage, getCategory, updateCategory, uploadCategoryImage } from '../api/adminShopCategoryApi'
+import {
+  categoryImageUrl,
+  createCategory,
+  deleteCategoryImage,
+  getCategory,
+  updateCategory,
+  uploadCategoryImage,
+} from '../api/adminShopCategoryApi'
 import AppTextField from '@/components/common/input/AppTextField.vue'
 import AppTextarea from '@/components/common/input/AppTextarea.vue'
 import AppSelect from '@/components/common/input/AppSelect.vue'
@@ -15,7 +22,10 @@ const categoryId = computed(() => (typeof route.params.id === 'string' ? route.p
 const isEdit = computed(() => Boolean(categoryId.value))
 const loading = ref(isEdit.value)
 const saving = ref(false)
-const statusOptions = [{ value: 'Active', label: 'เปิดใช้งาน' }, { value: 'Inactive', label: 'ปิดใช้งาน' }]
+const statusOptions = [
+  { value: 'Active', label: 'เปิดใช้งาน' },
+  { value: 'Inactive', label: 'ปิดใช้งาน' },
+]
 const form = reactive({ categoryName: '', description: '', status: 'Active' })
 const selectedImage = ref<File | null>(null)
 const imagePreview = ref('')
@@ -46,7 +56,10 @@ async function save() {
   }
   saving.value = true
   try {
-    const id = isEdit.value ? categoryId.value : (await createCategory({ categoryName: form.categoryName, description: form.description })).shopCategoryId
+    const id = isEdit.value
+      ? categoryId.value
+      : (await createCategory({ categoryName: form.categoryName, description: form.description }))
+          .shopCategoryId
     if (isEdit.value) await updateCategory(id, form)
     if (selectedImage.value) await uploadCategoryImage(id, selectedImage.value)
     await swal.success(isEdit.value ? 'บันทึกการแก้ไขแล้ว' : 'เพิ่มหมวดหมู่แล้ว')
@@ -60,15 +73,23 @@ async function save() {
 async function selectImage(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) return
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 2 * 1024 * 1024) {
+  if (
+    !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+    file.size > 2 * 1024 * 1024
+  ) {
     await swal.warning('ไฟล์รูปภาพไม่ถูกต้อง', 'กรุณาเลือก JPG, PNG หรือ WebP ขนาดไม่เกิน 2 MB')
     return
   }
   selectedImage.value = file
   imagePreview.value = URL.createObjectURL(file)
 }
+
 async function removeImage() {
-  if (!isEdit.value || !hasImage.value) { selectedImage.value = null; imagePreview.value = ''; return }
+  if (!isEdit.value || !hasImage.value) {
+    selectedImage.value = null
+    imagePreview.value = ''
+    return
+  }
   try {
     await deleteCategoryImage(categoryId.value)
     hasImage.value = false
@@ -79,6 +100,7 @@ async function removeImage() {
     await swal.error('ลบรูปภาพไม่สำเร็จ', getApiErrorMessage(error, 'กรุณาลองใหม่อีกครั้ง'))
   }
 }
+
 onMounted(load)
 </script>
 <template>
@@ -94,16 +116,54 @@ onMounted(load)
       class="mt-6 space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       @submit.prevent="save"
     >
-      <AppTextField
-        v-model="form.categoryName"
-        label="ชื่อหมวดหมู่"
-        placeholder="เช่น ร้านอาหาร"
-      /><AppTextarea
+      <AppTextField v-model="form.categoryName" label="ชื่อหมวดหมู่" placeholder="เช่น ร้านอาหาร" />
+      <AppTextarea
         v-model="form.description"
         label="รายละเอียด"
         placeholder="รายละเอียดของหมวดหมู่"
-      /><AppSelect v-if="isEdit" v-model="form.status" label="สถานะ" :items="statusOptions" item-title="label" item-value="value" />
-      <section class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4"><div class="flex items-center justify-between gap-3"><div><p class="font-bold text-slate-800">รูปภาพหมวดหมู่</p><p class="mt-1 text-xs text-slate-500">JPG, PNG หรือ WebP ขนาดไม่เกิน 2 MB — เก็บในฐานข้อมูล</p></div><label class="cursor-pointer rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">เลือกไฟล์<input class="hidden" type="file" accept="image/jpeg,image/png,image/webp" @change="selectImage" /></label></div><div v-if="imagePreview" class="relative mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white"><img :src="imagePreview" alt="ตัวอย่างรูปหมวดหมู่" class="h-48 w-full object-cover" /><button type="button" class="absolute right-3 top-3 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-rose-700" @click="removeImage"><i class="mdi mdi-delete-outline mr-1" />ลบรูป</button></div></section>
+      />
+      <AppSelect
+        v-if="isEdit"
+        v-model="form.status"
+        label="สถานะ"
+        :items="statusOptions"
+        item-title="label"
+        item-value="value"
+      />
+      <section class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="font-bold text-slate-800">รูปภาพหมวดหมู่</p>
+            <p class="mt-1 text-xs text-slate-500">
+              JPG, PNG หรือ WebP ขนาดไม่เกิน 2 MB — เก็บในฐานข้อมูล
+            </p>
+          </div>
+          <label
+            class="cursor-pointer rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+            >เลือกไฟล์<input
+              class="hidden"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              @change="selectImage"
+          /></label>
+        </div>
+        <div
+          v-if="imagePreview"
+          class="relative mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white"
+        >
+          <img
+            :src="imagePreview"
+            alt="ตัวอย่างรูปหมวดหมู่"
+            class="h-48 w-full object-cover"
+          /><button
+            type="button"
+            class="absolute right-3 top-3 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-rose-700"
+            @click="removeImage"
+          >
+            <i class="mdi mdi-delete-outline mr-1" />ลบรูป
+          </button>
+        </div>
+      </section>
       <div class="flex justify-end gap-3">
         <RouterLink
           to="/admin/categories"

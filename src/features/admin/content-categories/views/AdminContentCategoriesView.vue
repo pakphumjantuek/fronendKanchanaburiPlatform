@@ -128,9 +128,11 @@ function changePage(page: number) {
   pagination.value.page = page
   load()
 }
+
 function asCategory(item: object) {
   return item as ContentCategory
 }
+
 watch(status, () => {
   pagination.value.page = 1
   load()

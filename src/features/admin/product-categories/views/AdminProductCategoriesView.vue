@@ -19,6 +19,7 @@ const columns: DataTableColumn[] = [
   { key: 'status', label: 'สถานะ' },
   { key: 'actions', label: 'จัดการ' },
 ]
+
 async function load() {
   loading.value = true
   try {
@@ -32,14 +33,17 @@ async function load() {
     loading.value = false
   }
 }
+
 async function remove(category: ProductCategory) {
   await deleteProductCategory(category.productCategoryId)
   await load()
 }
+
 function changePage(page: number) {
   pagination.value.page = page
   load()
 }
+
 function asCategory(item: object): ProductCategory {
   return item as ProductCategory
 }

@@ -180,7 +180,7 @@ async function payWithStripe() {
 
 async function handleBankTransferSubmit(file: File, transferTime: string) {
   paying.value = true
-  errorMessage.value = ''  
+  errorMessage.value = ''
 
   try {
     const ids = queryOrderIds.value
@@ -212,10 +212,8 @@ async function handleBankTransferSubmit(file: File, transferTime: string) {
     <main class="mx-auto max-w-xl">
       <!-- Back Link -->
       <div class="mb-4">
-        <RouterLink
-          :to="singleOrderId ? `/orders/${singleOrderId}` : '/orders'"
-          class="inline-flex items-center gap-1.5 text-xs font-black text-[#D96C2C] hover:underline cursor-pointer"
-        >
+        <RouterLink :to="singleOrderId ? `/orders/${singleOrderId}` : '/orders'"
+          class="inline-flex items-center gap-1.5 text-xs font-black text-[#D96C2C] hover:underline cursor-pointer">
           <i class="mdi mdi-arrow-left"></i>
           <span>ย้อนกลับไปที่รายการคำสั่งซื้อ</span>
         </RouterLink>
@@ -225,22 +223,27 @@ async function handleBankTransferSubmit(file: File, transferTime: string) {
         <!-- Header Gateway Banner -->
         <div class="border-b-2 border-[#E8D9C9] pb-5 flex items-center justify-between">
           <div>
-            <div class="inline-flex items-center gap-1 text-[11px] font-black text-[#D96C2C] bg-[#D96C2C]/10 px-2.5 py-0.5 rounded-full border border-[#D96C2C]/20 mb-1">
+            <div
+              class="inline-flex items-center gap-1 text-[11px] font-black text-[#D96C2C] bg-[#D96C2C]/10 px-2.5 py-0.5 rounded-full border border-[#D96C2C]/20 mb-1">
               <i class="mdi mdi-shield-check"></i> SECURE PAYMENT GATEWAY
             </div>
             <h1 class="text-2xl sm:text-3xl font-black text-[#332820]">
               {{ (summary?.orders.length ?? 0) > 1 ? 'ชำระเงินรวมหลายรายการ' : 'ชำระเงินค่าสินค้า' }}
             </h1>
-            <p class="text-xs text-[#786B62] font-semibold mt-1">เลือกระบบชำระเงินผ่านบัตร หรือโอนผ่านธนาคารพร้อมแนบสลิป</p>
+            <p class="text-xs text-[#786B62] font-semibold mt-1">เลือกระบบชำระเงินผ่านบัตร หรือโอนผ่านธนาคารพร้อมแนบสลิป
+            </p>
           </div>
-          <div class="h-12 w-12 rounded-2xl bg-[#D96C2C] text-white flex items-center justify-center font-bold shadow-md shrink-0">
+          <div
+            class="h-12 w-12 rounded-2xl bg-[#D96C2C] text-white flex items-center justify-center font-bold shadow-md shrink-0">
             <i class="mdi mdi-credit-card-chip text-2xl text-white"></i>
           </div>
         </div>
 
         <!-- Orders Summary Breakdown -->
-        <div v-if="summary && summary.orders.length > 0" class="rounded-2xl border-2 border-[#E8D9C9] bg-[#F7F0E6] p-4 space-y-3">
-          <div class="flex items-center justify-between text-xs font-black text-[#332820] border-b border-[#E8D9C9] pb-2">
+        <div v-if="summary && summary.orders.length > 0"
+          class="rounded-2xl border-2 border-[#E8D9C9] bg-[#F7F0E6] p-4 space-y-3">
+          <div
+            class="flex items-center justify-between text-xs font-black text-[#332820] border-b border-[#E8D9C9] pb-2">
             <span class="flex items-center gap-1.5">
               <i class="mdi mdi-receipt-text-outline text-[#D96C2C] text-base"></i>
               รายการออเดอร์ที่ชำระ ({{ summary.orders.length }} รายการ)
@@ -248,14 +251,11 @@ async function handleBankTransferSubmit(file: File, transferTime: string) {
             <span class="text-[#D96C2C] font-black text-sm">
               ฿ {{ summary.totalAmount.toLocaleString('th-TH') }}
             </span>
-          </div>  
+          </div>
 
           <div class="space-y-2 max-h-36 overflow-y-auto pr-1">
-            <div
-              v-for="ord in summary.orders"
-              :key="ord.orderId"
-              class="flex items-center justify-between text-xs text-[#786B62] bg-[#FFF9F2] p-2.5 rounded-xl border border-[#E8D9C9]"
-            >
+            <div v-for="ord in summary.orders" :key="ord.orderId"
+              class="flex items-center justify-between text-xs text-[#786B62] bg-[#FFF9F2] p-2.5 rounded-xl border border-[#E8D9C9]">
               <div>
                 <span class="font-bold text-[#332820] block">#{{ ord.orderNumber }}</span>
                 <span class="text-[11px] text-[#786B62]">{{ ord.shopName || 'ร้านค้าชุมชน' }}</span>
@@ -279,28 +279,23 @@ async function handleBankTransferSubmit(file: File, transferTime: string) {
             <div id="stripe-payment-element" class="min-h-[60px]" />
 
             <!-- Fallback Credit Card Form -->
-            <PaymentCardForm
-              v-if="!isStripeElementMounted"
-              v-model:card-number="cardNumber"
-              v-model:card-expiry="cardExpiry"
-              v-model:card-cvc="cardCvc"
-              v-model:card-name="cardName"
-            />
+            <PaymentCardForm v-if="!isStripeElementMounted" v-model:card-number="cardNumber"
+              v-model:card-expiry="cardExpiry" v-model:card-cvc="cardCvc" v-model:card-name="cardName" />
 
-            <p v-if="errorMessage" class="rounded-xl bg-rose-100 p-4 text-xs font-bold text-rose-800 border border-rose-300">
+            <p v-if="errorMessage"
+              class="rounded-xl bg-rose-100 p-4 text-xs font-bold text-rose-800 border border-rose-300">
               {{ errorMessage }}
             </p>
 
             <!-- Stripe Submit Button -->
-            <button
-              type="button"
+            <button type="button"
               class="w-full py-4 rounded-2xl bg-[#D96C2C] hover:bg-[#BF5720] text-white font-black text-sm shadow-xl transition active:scale-95 disabled:opacity-60 cursor-pointer border-2 border-[#D96C2C] flex items-center justify-center gap-2"
-              :disabled="paying"
-              @click="payWithStripe"
-            >
-              <i class="mdi text-lg text-white" :class="{ 'animate-spin mdi-loading': paying, 'mdi-lock': !paying }"></i>
+              :disabled="paying" @click="payWithStripe">
+              <i class="mdi text-lg text-white"
+                :class="{ 'animate-spin mdi-loading': paying, 'mdi-lock': !paying }"></i>
               <span class="!text-white font-black text-base">
-                {{ paying ? 'กำลังทำรายการชำระเงินผ่าน Stripe...' : `ชำระเงินสุทธิ ฿ ${(summary?.totalAmount ?? 0).toLocaleString('th-TH')} ผ่าน Stripe` }}
+                {{ paying ? 'กำลังทำรายการชำระเงินผ่าน Stripe...' : `ชำระเงินสุทธิ ฿ ${(summary?.totalAmount ??
+                  0).toLocaleString('th-TH')} ผ่าน Stripe` }}
               </span>
             </button>
 
@@ -312,12 +307,8 @@ async function handleBankTransferSubmit(file: File, transferTime: string) {
         </div>
 
         <!-- TAB 2: BANK TRANSFER & SLIP UPLOAD -->
-        <PaymentBankTransfer
-          v-else-if="paymentTab === 'bank'"
-          :paying="paying"
-          :total-amount="summary?.totalAmount ?? 0"
-          @submit-slip="handleBankTransferSubmit"
-        />
+        <PaymentBankTransfer v-else-if="paymentTab === 'bank'" :paying="paying"
+          :total-amount="summary?.totalAmount ?? 0" @submit-slip="handleBankTransferSubmit" />
       </section>
     </main>
   </div>

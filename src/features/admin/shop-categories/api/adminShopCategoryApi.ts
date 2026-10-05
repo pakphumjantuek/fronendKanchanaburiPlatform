@@ -1,5 +1,6 @@
 import http from '@/shared/api/http'
 import type { PagedResult } from '@/shared/interface/PagedResult'
+
 export interface ShopCategory {
   shopCategoryId: string
   categoryName: string
@@ -7,13 +8,7 @@ export interface ShopCategory {
   status: string
   hasImage: boolean
 }
-export interface PagedCategories {
-  items: ShopCategory[]
-  page: number
-  pageSize: number
-  totalCount: number
-  totalPages: number
-}
+
 export async function getCategories(params: { page: number; pageSize: number }) {
   const { data } = await http.get<PagedResult<ShopCategory>>('/shop-categories', { params })
   return data
@@ -35,6 +30,15 @@ export async function updateCategory(
 export async function deleteCategory(id: string) {
   await http.delete(`/shop-categories/${id}`)
 }
-export async function uploadCategoryImage(id: string, image: File) { const formData = new FormData(); formData.append('image', image); await http.post(`/shop-categories/${id}/image`, formData) }
-export async function deleteCategoryImage(id: string) { await http.delete(`/shop-categories/${id}/image`) }
-export function categoryImageUrl(id: string) { const apiUrl = import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api'; return `${apiUrl}/shop-categories/${id}/image` }
+export async function uploadCategoryImage(id: string, image: File) {
+  const formData = new FormData()
+  formData.append('image', image)
+  await http.post(`/shop-categories/${id}/image`, formData)
+}
+export async function deleteCategoryImage(id: string) {
+  await http.delete(`/shop-categories/${id}/image`)
+}
+export function categoryImageUrl(id: string) {
+  const apiUrl = import.meta.env.VITE_API_URL ?? 'https://localhost:7289/api'
+  return `${apiUrl}/shop-categories/${id}/image`
+}

@@ -21,11 +21,10 @@ import {
   exportAdminShopSales,
   exportAdminPayouts,
   exportAdminPaymentSlips,
-  type AdminDashboardReport,
-  type AdminExportParams,
 } from '@/features/admin/api/adminDashboardApi'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
 import { useSwal } from '@/plugins/sweetalert'
+import type { AdminDashboardReport, AdminExportParams } from '../../api/types'
 
 Chart.register(
   LineController,

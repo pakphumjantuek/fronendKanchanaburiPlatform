@@ -15,7 +15,6 @@ const categories = ref<ShopCategory[]>([])
 const loading = ref(true)
 const pagination = ref<DataTablePagination>({ page: 1, pageSize: 10, totalCount: 0, totalPages: 0 })
 const columns: DataTableColumn[] = [
-  // { key: 'image', label: 'รูป' },
   { key: 'categoryName', label: 'หมวดหมู่', class: 'font-semibold text-slate-900' },
   { key: 'description', label: 'รายละเอียด', class: 'text-slate-600' },
   { key: 'status', label: 'สถานะ' },
@@ -73,8 +72,8 @@ onMounted(load)
       <RouterLink
         to="/admin/categories/new"
         class="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700"
-        >+ เพิ่มหมวดหมู่</RouterLink
-      >
+        >+ เพิ่มหมวดหมู่
+      </RouterLink>
     </div>
     <AppDataTable
       :columns="columns"
@@ -103,15 +102,15 @@ onMounted(load)
           "
           >{{ asCategory(item).status }}</span
         ></template
-      ><template #cell-actions="{ item }"
-        ><RouterLink
+      ><template #cell-actions="{ item }">
+        <RouterLink
           :to="`/admin/categories/${asCategory(item).shopCategoryId}/edit`"
           class="mr-3 font-semibold text-indigo-600"
           >แก้ไข</RouterLink
         ><button class="font-semibold text-red-600" @click="remove(asCategory(item))">
           ปิดใช้งาน
-        </button></template
-      ></AppDataTable
+        </button>
+      </template></AppDataTable
     >
   </main>
 </template>

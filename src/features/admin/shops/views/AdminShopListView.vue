@@ -7,17 +7,13 @@
         <p class="mt-2 text-slate-500">ตรวจสอบและจัดการสถานะร้านค้าทั้งหมด</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
-        <RouterLink
-          to="/admin/shops/pending"
-          class="inline-flex items-center gap-2 rounded-xl bg-[#D96C2C] px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-[#BF5720]"
-        >
+        <RouterLink to="/admin/shops/pending"
+          class="inline-flex items-center gap-2 rounded-xl bg-[#D96C2C] px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-[#BF5720]">
           <i class="mdi mdi-account-clock-outline text-lg"></i>
           คำขอสมัครร้านค้า
         </RouterLink>
-        <button
-          class="rounded-xl border border-slate-300 px-4 py-2.5 font-semibold text-slate-600 hover:bg-white"
-          @click="load"
-        >
+        <button class="rounded-xl border border-slate-300 px-4 py-2.5 font-semibold text-slate-600 hover:bg-white"
+          @click="load">
           รีเฟรช
         </button>
       </div>
@@ -33,12 +29,9 @@
             <p class="text-sm text-[#786B62]">ค้นหาจากชื่อร้าน หรือเลือกสถานะที่ต้องการ</p>
           </div>
         </div>
-        <button
-          v-if="hasFilters"
-          type="button"
+        <button v-if="hasFilters" type="button"
           class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-[#BF5720] transition hover:bg-[#FBE8D8]"
-          @click="clearFilters"
-        >
+          @click="clearFilters">
           <i class="mdi mdi-filter-remove-outline text-base"></i>
           ล้างตัวกรอง
         </button>
@@ -47,66 +40,40 @@
         <div>
           <label class="mb-1.5 block text-sm font-bold text-[#4A3E35]">ชื่อร้านค้า</label>
           <div class="shop-search-field relative">
-            <i class="mdi mdi-magnify pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-xl text-[#A18979]"></i>
-            <AppTextField
-              v-model="search"
-              placeholder="พิมพ์ชื่อร้านที่ต้องการค้นหา"
-            />
+            <i
+              class="mdi mdi-magnify pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-xl text-[#A18979]"></i>
+            <AppTextField v-model="search" placeholder="พิมพ์ชื่อร้านที่ต้องการค้นหา" />
           </div>
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-bold text-[#4A3E35]">สถานะร้านค้า</label>
           <div class="shop-status-field relative">
-            <i class="mdi mdi-store-cog-outline pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-xl text-[#A18979]"></i>
-            <AppSelect
-              v-model="status"
-              :items="statusOptions"
-              item-title="label"
-              item-value="value"
-              placeholder="ทุกสถานะ"
-              clearable
-            />
+            <i
+              class="mdi mdi-store-cog-outline pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-xl text-[#A18979]"></i>
+            <AppSelect v-model="status" :items="statusOptions" item-title="label" item-value="value"
+              placeholder="ทุกสถานะ" clearable />
           </div>
         </div>
       </div>
     </section>
-    <AppDataTable
-      :columns="columns"
-      :items="shops"
-      row-key="shopId"
-      :loading="loading"
-      empty-message="ไม่พบร้านค้า"
-      :pagination="pagination"
-      @page-change="changePage"
-      ><template #cell-status="{ item }"
-        ><span
-          class="rounded-full px-2.5 py-1 text-xs font-bold"
-          :class="
-            asShop(item).status === 'Active'
+    <AppDataTable :columns="columns" :items="shops" row-key="shopId" :loading="loading" empty-message="ไม่พบร้านค้า"
+      :pagination="pagination" @page-change="changePage"><template #cell-status="{ item }"><span
+          class="rounded-full px-2.5 py-1 text-xs font-bold" :class="asShop(item).status === 'Active'
               ? 'bg-emerald-100 text-emerald-700'
               : ['Rejected', 'Suspended'].includes(asShop(item).status)
                 ? 'bg-red-100 text-red-700'
                 : asShop(item).status === 'PendingApproval'
                   ? 'bg-amber-100 text-amber-700'
                   : 'bg-slate-100 text-slate-700'
-          "
-          >{{ statusLabel(asShop(item).status) }}</span
-        ></template
-      ><template #cell-actions="{ item }"
-        ><div class="flex items-center gap-3">
-          <RouterLink
-            :to="`/admin/shops/${asShop(item).shopId}/products`"
-            class="whitespace-nowrap font-semibold text-indigo-600"
-            >ดูสินค้า</RouterLink
-          ><AppSelect
-            :model-value="asShop(item).status"
-            :items="statusOptions"
-            item-title="label"
-            item-value="value"
+            ">{{ statusLabel(asShop(item).status) }}</span></template><template #cell-actions="{ item }">
+        <div class="flex items-center gap-3">
+          <RouterLink :to="`/admin/shops/${asShop(item).shopId}/products`"
+            class="whitespace-nowrap font-semibold text-indigo-600">ดูสินค้า</RouterLink>
+          <AppSelect :model-value="asShop(item).status" :items="statusOptions" item-title="label" item-value="value"
             :disabled="updatingId === asShop(item).shopId"
-            @update:model-value="changeStatus(asShop(item), String($event))"
-          /></div></template
-    ></AppDataTable>
+            @update:model-value="changeStatus(asShop(item), String($event))" />
+        </div>
+      </template></AppDataTable>
   </main>
 </template>
 
@@ -132,6 +99,7 @@ const updatingId = ref<string | null>(null)
 const pagination = ref<DataTablePagination>({ page: 1, pageSize: 10, totalCount: 0, totalPages: 0 })
 const swal = useSwal()
 const hasFilters = computed(() => Boolean(search.value.trim() || status.value))
+
 const statusOptions = [
   { value: 'PendingApproval', label: 'รออนุมัติ' },
   { value: 'Active', label: 'เปิดใช้งาน' },
@@ -142,7 +110,6 @@ const statusOptions = [
 ]
 const columns: DataTableColumn[] = [
   { key: 'shopName', label: 'ร้านค้า', class: 'font-semibold text-slate-900' },
-  // { key: 'ownerUserId', label: 'เจ้าของ', class: 'text-sm text-slate-600' },
   { key: 'categoryName', label: 'หมวดหมู่', class: 'text-sm text-slate-600' },
   { key: 'districtName', label: 'พื้นที่', class: 'text-sm text-slate-600' },
   { key: 'status', label: 'สถานะ' },

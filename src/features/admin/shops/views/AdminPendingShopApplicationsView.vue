@@ -9,14 +9,11 @@
       <div class="flex flex-wrap gap-3">
         <button
           class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-600 hover:bg-slate-50"
-          @click="load"
-        >
+          @click="load">
           รีเฟรช
         </button>
-        <RouterLink
-          to="/admin/shops"
-          class="rounded-xl border border-[#D96C2C] px-4 py-2.5 font-semibold text-[#BF5720] hover:bg-[#FFF3E8]"
-        >
+        <RouterLink to="/admin/shops"
+          class="rounded-xl border border-[#D96C2C] px-4 py-2.5 font-semibold text-[#BF5720] hover:bg-[#FFF3E8]">
           จัดการร้านค้าทั้งหมด
         </RouterLink>
       </div>
@@ -38,15 +35,8 @@
       <AppTextField v-model="search" placeholder="ค้นหาชื่อร้านค้า" />
     </section>
 
-    <AppDataTable
-      :columns="columns"
-      :items="shops"
-      row-key="shopId"
-      :loading="loading"
-      empty-message="ไม่มีคำขอสมัครร้านค้าที่รอพิจารณา"
-      :pagination="pagination"
-      @page-change="changePage"
-    >
+    <AppDataTable :columns="columns" :items="shops" row-key="shopId" :loading="loading"
+      empty-message="ไม่มีคำขอสมัครร้านค้าที่รอพิจารณา" :pagination="pagination" @page-change="changePage">
       <template #cell-shopName="{ item }">
         <div>
           <p class="font-bold text-slate-900">{{ asShop(item).shopName }}</p>
@@ -56,16 +46,12 @@
         <div class="flex flex-wrap items-center gap-2">
           <button
             class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-            :disabled="updatingId === asShop(item).shopId"
-            @click="changeStatus(asShop(item), 'Active')"
-          >
+            :disabled="updatingId === asShop(item).shopId" @click="changeStatus(asShop(item), 'Active')">
             อนุมัติ
           </button>
           <button
             class="rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-bold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
-            :disabled="updatingId === asShop(item).shopId"
-            @click="changeStatus(asShop(item), 'Rejected')"
-          >
+            :disabled="updatingId === asShop(item).shopId" @click="changeStatus(asShop(item), 'Rejected')">
             ไม่อนุมัติ
           </button>
         </div>
@@ -93,6 +79,7 @@ const loading = ref(true)
 const updatingId = ref<string | null>(null)
 const pagination = ref<DataTablePagination>({ page: 1, pageSize: 10, totalCount: 0, totalPages: 0 })
 const swal = useSwal()
+
 const columns: DataTableColumn[] = [
   { key: 'shopName', label: 'ร้านค้า' },
   { key: 'categoryName', label: 'หมวดหมู่', class: 'text-sm text-slate-600' },

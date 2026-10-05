@@ -159,7 +159,8 @@ async function load() {
 import { getCategoryRule } from '@/features/contents/constants/categoryRules'
 import { getContentSchedules } from '@/features/contents/api'
 import { createSchedule, updateSchedule } from '@/features/admin/schedules/api/adminScheduleApi'
-import { toNullableNumber, youtubeEmbedUrl, type ScheduleItemForm } from './interface/type'
+import { toNullableNumber, youtubeEmbedUrl } from '@/shared/utils/youtube'
+import type { ScheduleItemForm } from './interface/type'
 
 const selectedCategoryName = computed(
   () => categories.value.find((c) => c.contentCategoryId === form.contentCategoryId)?.categoryName,

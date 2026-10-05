@@ -22,6 +22,7 @@ import AppTextarea from '@/components/common/input/AppTextarea.vue'
 import LocationPickerMap from '@/components/common/map/LocationPickerMap.vue'
 import { getApiErrorMessage } from '@/features/auth/api/getApiErrorMessage'
 import { useSwal } from '@/plugins/sweetalert'
+import { toNullableNumber, youtubeEmbedUrl } from '@/shared/utils/youtube'
 
 const route = useRoute()
 const router = useRouter()
@@ -137,20 +138,8 @@ async function save() {
     saving.value = false
   }
 }
-function toNullableNumber(value: number | string | null) {
-  if (value === null || value === '') return null
-  const number = Number(value)
-  return Number.isFinite(number) ? number : null
-}
-function youtubeEmbedUrl(url: string) {
-  try {
-    const parsed = new URL(url)
-    const id = parsed.hostname.includes('youtu.be')
-      ? parsed.pathname.slice(1)
-      : parsed.searchParams.get('v') ?? (parsed.pathname.startsWith('/embed/') ? parsed.pathname.split('/')[2] : '')
-    return id ? `https://www.youtube-nocookie.com/embed/${id}` : ''
-  } catch { return '' }
-}
+
+
 function toggleTag(tagId: string) {
   selectedTagIds.value = selectedTagIds.value.includes(tagId)
     ? selectedTagIds.value.filter((id) => id !== tagId)

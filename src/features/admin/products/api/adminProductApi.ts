@@ -1,16 +1,14 @@
 import http from '@/shared/api/http'
 import type { Product } from '@/features/shops/shared/types/product'
+import type { PagedResult } from '@/shared/interface/PagedResult'
 
-export interface PagedProducts {
-  items: Product[]
+export async function getAdminProducts(params: {
+  shopId: string
+  status?: string | null
   page: number
   pageSize: number
-  totalCount: number
-  totalPages: number
-}
-
-export async function getAdminProducts(params: { shopId: string; status?: string | null; page: number; pageSize: number }) {
-  const { data } = await http.get<PagedProducts>('/products/admin', { params })
+}) {
+  const { data } = await http.get<PagedResult<Product>>('/products/admin', { params })
   return data
 }
 
